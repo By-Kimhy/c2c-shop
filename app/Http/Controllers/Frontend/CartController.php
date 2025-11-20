@@ -28,12 +28,32 @@ class CartController extends Controller
         return response()->json(['success'=>true,'cart_count'=>$cart->items()->count()]);
     }
 
-    public function update(Request $request)
-    {
-        $item = CartItem::findOrFail($request->item_id);
-        $this->cartService->updateItem($item, (int)$request->quantity);
-        return redirect()->route('cart.index')->with('success','Cart updated');
+    // public function update(Request $request)
+    // {
+    //     $item = CartItem::findOrFail($request->item_id);
+    //     $this->cartService->updateItem($item, (int)$request->quantity);
+    //     return redirect()->route('cart.index')->with('success','Cart updated');
+    // }
+
+    public function update(Request $req)
+{
+    $data = $req->validate([
+        'item_id' => 'required|exists:cart_items,id',
+        'quantity' => 'required|integer|min:1'
+    ]);
+
+    $item = CartItem::findOrFail($data['item_id']);
+    $item->quantity = $data['quantity'];
+    $item->line_total = $item->quantity * $item->unit_price;
+    $item->save();
+
+    if($req->wantsJson() || $req->isJson()){
+        return response()->json(['success'=>true]);
     }
+
+    return redirect()->route('cart.index')->with('success','Cart updated');
+}
+
 
     public function remove(Request $request)
     {

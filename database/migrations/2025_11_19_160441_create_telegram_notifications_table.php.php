@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('telegram_notifications', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
             $table->id();
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
             $table->enum('status',['pending','sent'])->default('pending');

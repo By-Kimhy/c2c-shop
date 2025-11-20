@@ -1,0 +1,100 @@
+@extends('frontend.layout.master')
+@section('content')
+
+<!-- Start Banner Area -->
+<section class="banner-area organic-breadcrumb">
+    <div class="container">
+        <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+            <div class="col-first">
+                <h1>ការបញ្ជាក់</h1>
+                <nav class="d-flex align-items-center">
+                    <a href="{{ url('/') }}">ទំព័រដើម<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="{{ route('orders.show', $order->order_number) }}">ការបញ្ជាក់</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End Banner Area -->
+
+<!--================Order Details Area =================-->
+<section class="order_details section_gap">
+    <div class="container">
+        <h3 class="title_confirmation">សូមអរគុណ ការបញ្ជាទិញរបស់អ្នកទទួលបានជោគជ័យ</h3>
+
+        <div class="row order_d_inner">
+            <div class="col-lg-6">
+                <div class="details_item">
+                    <h4>ព័ត៌មានបញ្ជាទិញ</h4>
+                    <ul class="list">
+                        <li><a href="#"><span>លេខបញ្ជាទិញ</span> : {{ $order->order_number }}</a></li>
+                        <li><a href="#"><span>កាលបរិច្ឆេទ</span> : {{ $order->created_at->format('d/M/Y') }}</a></li>
+                        <li><a href="#"><span>សរុប</span> : {{ number_format($order->total) }} {{ $order->currency }}</a></li>
+                        <li><a href="#"><span>វិធី​សា​ស្រ្ត​ទូទាត់</span> : {{ strtoupper($order->payment_method ?? '-') }}</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="details_item">
+                    <h4>អាសយដ្ឋានចេញវិក័យប័ត្រ</h4>
+                    <ul class="list">
+                        <li><a href="#"><span>ឈ្មោះ</span> : {{ $order->shipping_name }}</a></li>
+                        <li><a href="#"><span>ទូរសព្ទ</span> : {{ $order->shipping_phone }}</a></li>
+                        <li><a href="#"><span>អាសយដ្ឋាន</span> : {!! nl2br(e($order->shipping_address)) !!}</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="order_details_table">
+            <h2>ព័ត៌មានលម្អិតនៃការបញ្ជាទិញ</h2>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">ផលិតផល</th>
+                            <th scope="col">ចំនួន</th>
+                            <th scope="col">សរុប</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($order->items as $it)
+                        <tr>
+                            <td>
+                                <p>{{ $it->name }}</p>
+                            </td>
+                            <td>
+                                <h5>x {{ $it->quantity }}</h5>
+                            </td>
+                            <td>
+                                <p>{{ number_format($it->line_total) }} {{ $order->currency }}</p>
+                            </td>
+                        </tr>
+                        @endforeach
+
+                        <tr>
+                            <td><h4>សរុបទឹកប្រាក់</h4></td>
+                            <td></td>
+                            <td><p>{{ number_format($order->total) }} {{ $order->currency }}</p></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="container mt-5">
+            <div class="row">
+                <div class="col-12 d-flex justify-content-end">
+                    {{-- invoice route opens printable invoice generated from stored invoice_html --}}
+                    <a href="{{ route('orders.invoice', $order->order_number) }}" target="_blank" class="btn btn-primary px-4 py-2" style="font-size: 16px; border-radius: 6px;">
+                        ទាញយក / បោះពុម្ពវិក្កយបត្រ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--================End Order Details Area =================-->
+
+@endsection

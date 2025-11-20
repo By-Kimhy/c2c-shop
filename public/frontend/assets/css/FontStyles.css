@@ -1,0 +1,31 @@
+@font-face {
+    font-family: 'Kantumruy Pro';
+    src: url('../Fonts/KantumruyPro/KantumruyPro-Regular.eot');
+    src: url('../Fonts/KantumruyPro/KantumruyPro-Regular.eot?#iefix') format('embedded-opentype'),
+        url('../Fonts/KantumruyPro/KantumruyPro-Regular.woff2') format('woff2'),
+        url('../Fonts/KantumruyPro/KantumruyPro-Regular.woff') format('woff'),
+        url('../Fonts/KantumruyPro/KantumruyPro-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Koulen';
+    src: url('../Fonts/Koulen/Koulen.eot');
+    src: url('../Fonts/Koulen/Koulen.eot?#iefix') format('embedded-opentype'),
+        url('../Fonts/Koulen/Koulen.woff2') format('woff2'),
+        url('../Fonts/Koulen/Koulen.woff') format('woff'),
+        url('../Fonts/Koulen/Koulen.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+.KantumruyPro{
+	font-family: 'Kantumruy Pro';
+}
+
+.Koulen{
+	font-family: 'Koulen';
+}

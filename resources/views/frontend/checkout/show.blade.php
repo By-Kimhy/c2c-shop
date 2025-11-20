@@ -1,4 +1,4 @@
-@extends('frontend.layouts.app')
+@extends('frontend.layouts.master')
 @section('content')
 <h3>Checkout</h3>
 <form method="post" action="{{ route('checkout.process') }}">
