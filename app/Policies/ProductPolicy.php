@@ -23,39 +23,21 @@ class ProductPolicy
         return true;
     }
 
-    /**
-     * Only sellers and admins can create products.
-     */
     public function create(User $user): bool
     {
-        return in_array($user->role, ['seller', 'admin']);
+        return $user->hasRole('seller') || $user->hasRole('admin');
     }
 
-    /**
-     * Admins can update any product.
-     * Sellers can update only their own products.
-     */
     public function update(User $user, Product $product): bool
     {
-        if ($user->role === 'admin') {
-            return true;
-        }
-
-        return $user->role === 'seller' && $user->id === $product->user_id;
+        return $user->hasRole('admin') || ($user->hasRole('seller') && $user->id === $product->user_id);
     }
 
-    /**
-     * Admins can delete any product.
-     * Sellers can delete only their own products.
-     */
     public function delete(User $user, Product $product): bool
     {
-        if ($user->role === 'admin') {
-            return true;
-        }
-
-        return $user->role === 'seller' && $user->id === $product->user_id;
+        return $user->hasRole('admin') || ($user->hasRole('seller') && $user->id === $product->user_id);
     }
+
 
     /**
      * Custom helper: manage means full control (update/delete).
@@ -68,4 +50,9 @@ class ProductPolicy
 
         return $user->role === 'seller' && $product->user_id === $user->id;
     }
+
+    protected $policies = [
+        Product::class => ProductPolicy::class,
+    ];
+
 }

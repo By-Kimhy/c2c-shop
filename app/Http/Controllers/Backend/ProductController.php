@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ProductRequest;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -12,7 +11,9 @@ class ProductController extends Controller
 {
     public function index()
     {
-        $products = Product::with('category', 'seller')->paginate(20);
+        $user = auth()->user();
+        $products = $user->hasRole('admin') ? Product::latest()->paginate(10) 
+                                            : Product::where('user_id', $user->id)->latest()->paginate(10);
         return view('backend.products.index', compact('products'));
     }
 
@@ -22,45 +23,51 @@ class ProductController extends Controller
         return view('backend.products.create', compact('categories'));
     }
 
-    public function store(ProductRequest $request)
+    public function store(Request $request)
     {
-        $data = $request->validated();
-        $data['user_id'] = auth()->id();
+        $request->validate([
+            'name'=>'required',
+            'category_id'=>'required|exists:categories,id',
+            'price'=>'required|numeric|min:0',
+            'stock'=>'required|integer|min:0',
+            'status'=>'required|in:draft,published',
+        ]);
 
-        Product::create($data);
+        $product = new Product($request->only('name','category_id','description','price','stock','status'));
+        $product->user_id = auth()->id();
+        $product->save();
 
-        return redirect()
-            ->route('backend.products.index')
-            ->with('success', 'Product created successfully.');
+        return redirect()->route('backend.products.index')->with('success','Product created');
     }
 
     public function edit(Product $product)
     {
-        $this->authorize('manage', $product);
-
+        $this->authorize('update', $product);
         $categories = Category::all();
-        return view('backend.products.edit', compact('product', 'categories'));
+        return view('backend.products.edit', compact('product','categories'));
     }
 
-    public function update(ProductRequest $request, Product $product)
+    public function update(Request $request, Product $product)
     {
-        $this->authorize('manage', $product);
+        $this->authorize('update', $product);
 
-        $product->update($request->validated());
+        $request->validate([
+            'name'=>'required',
+            'category_id'=>'required|exists:categories,id',
+            'price'=>'required|numeric|min:0',
+            'stock'=>'required|integer|min:0',
+            'status'=>'required|in:draft,published',
+        ]);
 
-        return redirect()
-            ->route('backend.products.index')
-            ->with('success', 'Product updated successfully.');
+        $product->update($request->only('name','category_id','description','price','stock','status'));
+
+        return redirect()->route('backend.products.index')->with('success','Product updated');
     }
 
     public function destroy(Product $product)
     {
-        $this->authorize('manage', $product);
-
+        $this->authorize('delete', $product);
         $product->delete();
-
-        return redirect()
-            ->route('backend.products.index')
-            ->with('success', 'Product deleted successfully.');
+        return redirect()->route('backend.products.index')->with('success','Product deleted');
     }
 }
