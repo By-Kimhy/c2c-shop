@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class SellerProfile extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'user_id',
         'shop_name',
@@ -18,6 +21,10 @@ class SellerProfile extends Model
         'description',
         'status',
         'verified_at',
+    ];
+
+    protected $casts = [
+        'verified_at' => 'datetime',
     ];
 
     // auto-generate slug if not provided
