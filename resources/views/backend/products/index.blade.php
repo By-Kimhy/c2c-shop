@@ -80,9 +80,9 @@
                         </table>
                     </div>
 
-                    <div class="card-footer clearfix">
+                    {{-- <div class="card-footer clearfix">
                         {{ $products->links() }}
-                    </div>
+                    </div> --}}
                     @else
                     <div class="p-4">No products found.</div>
                     @endif

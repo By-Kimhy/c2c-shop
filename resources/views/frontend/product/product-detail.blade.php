@@ -18,465 +18,388 @@
 	</section>
 	<!-- End Banner Area -->
 
-	{{-- <!--================Single Product Area =================-->
-	<div class="product_image_area">
+	@php
+	use Illuminate\Support\Facades\Storage;
+	$images = $product->images ?? [];
+	// fallback placeholder
+	$placeholder = asset('frontend/assets/img/product/p4.jpg');
+	// compute URL for given relative path
+	$imgUrl = function($rel) use ($placeholder) {
+	if (! $rel) return $placeholder;
+	$rel = ltrim($rel, '/');
+	// check public disk existence
+	if (Storage::disk('public')->exists($rel)) {
+	return asset('storage/'.$rel);
+	}
+	// try legacy location: storage/app/private/public/...
+	if (file_exists(storage_path('app/private/public/'.$rel))) {
+	// This will still not be available via asset() unless linked - fallback to placeholder
+	return $placeholder;
+	}
+	return $placeholder;
+	};
+	@endphp
+
+	<section class="product-detail section_gap">
 	    <div class="container">
-	        <div class="row s_product_inner">
-	            <div class="col-lg-6">
-	                <div class="s_Product_carousel">
-	                    <div class="single-prd-item">
-	                        <img class="img-fluid" src="{{asset('frontend/assets/img/category/s-p1.jpg')}}" alt="">
-	</div>
-	<div class="single-prd-item">
-	    <img class="img-fluid" src="{{asset('frontend/assets/img/category/s-p1.jpg')}}" alt="">
-	</div>
-	<div class="single-prd-item">
-	    <img class="img-fluid" src="{{asset('frontend/assets/img/category/s-p1.jpg')}}" alt="">
-	</div>
-	</div>
-	</div>
-	<div class="col-lg-5 offset-lg-1">
-	    <div class="s_product_text">
-	        <h3>addidas New Hammer sole</h3>
-	        <h2>$149.99</h2>
-	        <ul class="list">
-	            <li><a class="active" href="#"><span>ប្រភេទ</span> : Household</a></li>
-	            <li><a href="#"><span>ស្តុក</span> : មានក្នុងស្តុក</a></li>
-	        </ul>
-	        <p>ស្បែកជើងទម្ងន់ស្រាលទាំងនេះមានផាសុកភាព និងឆ្លើយតប
-	            ដូច្នេះអ្នកអាចលេងហ្គេមរបស់អ្នកតាមរបៀបដែលអ្នកចង់បាន។ ពួកវាងាយស្រួលបំបែក
-	            ហើយអ្នកគួរតែជ្រើសរើសទំហំធម្មតារបស់អ្នក ឬបង្កើនទំហំពាក់កណ្តាលសម្រាប់ទំហំធំទូលាយ។</p>
-	        <div class="product_count">
-	            <label for="qty">ចំនួន:</label>
-	            <input type="text" name="qty" id="sst" maxlength="12" value="1" title="Quantity:" class="input-text qty">
-	            <button onclick="var result = document.getElementById('sst'); var sst = result.value; if( !isNaN( sst )) result.value++;return false;" class="increase items-count" type="button"><i class="lnr lnr-chevron-up"></i></button>
-	            <button onclick="var result = document.getElementById('sst'); var sst = result.value; if( !isNaN( sst ) && sst > 0 ) result.value--;return false;" class="reduced items-count" type="button"><i class="lnr lnr-chevron-down"></i></button>
-	        </div>
-	        <div class="card_area d-flex align-items-center">
-	            <a class="primary-btn" href="{{url('/cart')}}">បន្តែមចូលកន្ត្រក</a>
+	        <div class="row">
 
-	        </div>
-	    </div>
-	</div>
-	</div>
-	</div>
-	</div>
-	<!--================End Single Product Area =================-->
-
-	<!--================Product Description Area =================-->
-	<section class="product_description_area">
-	    <div class="container">
-	        <ul class="nav nav-tabs" id="myTab" role="tablist">
-	            <li class="nav-item">
-	                <a class="nav-link" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">ការពិពណ៌នា</a>
-	            </li>
-	            <li class="nav-item">
-	                <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">ការបញ្ជាក់</a>
-	            </li>
-	            <li class="nav-item">
-	                <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">មតិយោបល់</a>
-	            </li>
-	            <li class="nav-item">
-	                <a class="nav-link active" id="review-tab" data-toggle="tab" href="#review" role="tab" aria-controls="review" aria-selected="false">ពិនិត្យ</a>
-	            </li>
-	        </ul>
-	        <div class="tab-content" id="myTabContent">
-	            <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab">
-	                <p>ពេលខ្លះការរចនាដ៏សាមញ្ញគឺជាការរចនាដ៏ល្អបំផុត ហើយស្លាយ adidas ទាំងនេះរួមបញ្ចូលវា។ ជាមួយមួយដុំ
-	                    ការសាងសង់ ពួកគេមានជើង Molded EVA ដែលខ្នើយគ្រប់ជំហាន និងស្ងួតយ៉ាងលឿន។ របស់ពួកគេ។
-	                    រូប​រាង​ស្លីម​រលោង​ឆ្លុះ​បញ្ចាំង​ពី​បេះដូង​របស់​អាឌីដាស៖ រូបរាង​រលោង​ធ្វើ​ឱ្យ​មាន​មុខងារ​សម្រាប់​រាល់​ថ្ងៃ។
-	                </p>
-	            </div>
-	            <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-	                <div class="table-responsive">
-	                    <table class="table">
-	                        <tbody>
-	                            <tr>
-	                                <td>
-	                                    <h5>ទទឹង</h5>
-	                                </td>
-	                                <td>
-	                                    <h5>128mm</h5>
-	                                </td>
-	                            </tr>
-	                            <tr>
-	                                <td>
-	                                    <h5>កម្ពស់</h5>
-	                                </td>
-	                                <td>
-	                                    <h5>508mm</h5>
-	                                </td>
-	                            </tr>
-	                            <tr>
-	                                <td>
-	                                    <h5>ជម្រៅ</h5>
-	                                </td>
-	                                <td>
-	                                    <h5>85mm</h5>
-	                                </td>
-	                            </tr>
-	                            <tr>
-	                                <td>
-	                                    <h5>ទម្ងន់</h5>
-	                                </td>
-	                                <td>
-	                                    <h5>52gm</h5>
-	                                </td>
-	                            </tr>
-	                            <tr>
-	                                <td>
-	                                    <h5>ការត្រួតពិនិត្យគុណភាព</h5>
-	                                </td>
-	                                <td>
-	                                    <h5>មានគុណភាព</h5>
-	                                </td>
-	                            </tr>
-	                            <tr>
-	                                <td>
-	                                    <h5>ប្រអប់នីមួយៗមាន</h5>
-	                                </td>
-	                                <td>
-	                                    <h5>60pcs</h5>
-	                                </td>
-	                            </tr>
-	                        </tbody>
-	                    </table>
-	                </div>
-	            </div>
-	            <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-	                <div class="row">
-	                    <div class="col-lg-6">
-	                        <div class="comment_list">
-	                            <div class="review_item">
-	                                <div class="media">
-	                                    <div class="d-flex">
-	                                        <img src="{{asset('frontend/assets/img/product/review-1.png')}}" alt="">
-	                                    </div>
-	                                    <div class="media-body">
-	                                        <h4>Blake Ruiz</h4>
-	                                        <h5>12th Feb, 2018 at 05:56 pm</h5>
-	                                        <a class="reply_btn" href="#">Reply</a>
-	                                    </div>
-	                                </div>
-	                                <p>Great arch support and lighter than previous versions. Curious to see how they hold up.</p>
-	                            </div>
-	                            <div class="review_item reply">
-	                                <div class="media">
-	                                    <div class="d-flex">
-	                                        <img src="{{asset('frontend/assets/img/product/review-2.png')}}" alt="">
-	                                    </div>
-	                                    <div class="media-body">
-	                                        <h4>Blake Ruiz</h4>
-	                                        <h5>12th Feb, 2018 at 05:56 pm</h5>
-	                                        <a class="reply_btn" href="#">Reply</a>
-	                                    </div>
-	                                </div>
-	                                <p>Comfy. Good quality. Great for any project. I use it mainly in the house and it’s perfect. I have wide feet and had to size up. But still the length and width is good.</p>
-	                            </div>
-	                            <div class="review_item">
-	                                <div class="media">
-	                                    <div class="d-flex">
-	                                        <img src="{{asset('frontend/assets/img/product/review-3.png')}}" alt="">
-	                                    </div>
-	                                    <div class="media-body">
-	                                        <h4>Blake Ruiz</h4>
-	                                        <h5>12th Feb, 2018 at 05:56 pm</h5>
-	                                        <a class="reply_btn" href="#">Reply</a>
-	                                    </div>
-	                                </div>
-	                                <p>very nice fit and nice fitting because it fit nicelys</p>
-	                            </div>
-	                        </div>
-	                    </div>
-	                    <div class="col-lg-6">
-	                        <div class="review_box">
-	                            <h4>បង្ហោះមតិ</h4>
-	                            <form class="row contact_form" action="https://themewagon.github.io/karma/contact_process.php" method="post" id="contactForm" novalidate="novalidate">
-	                                <div class="col-md-12">
-	                                    <div class="form-group">
-	                                        <input type="text" class="form-control" id="name" name="name" placeholder="ឈ្មោះ​ពេញ​របស់​អ្នក">
-	                                    </div>
-	                                </div>
-	                                <div class="col-md-12">
-	                                    <div class="form-group">
-	                                        <input type="email" class="form-control" id="email" name="email" placeholder="អ៊ី​ម៉េ​ល">
-	                                    </div>
-	                                </div>
-	                                <div class="col-md-12">
-	                                    <div class="form-group">
-	                                        <input type="text" class="form-control" id="number" name="number" placeholder="លេខទូរសព្ទ">
-	                                    </div>
-	                                </div>
-	                                <div class="col-md-12">
-	                                    <div class="form-group">
-	                                        <textarea class="form-control" name="message" id="message" rows="1" placeholder="សារ"></textarea>
-	                                    </div>
-	                                </div>
-	                                <div class="col-md-12 text-right">
-	                                    <button type="submit" value="submit" class="btn primary-btn">ដាក់ស្នើ</button>
-	                                </div>
-	                            </form>
-	                        </div>
-	                    </div>
-	                </div>
-	            </div>
-	            <div class="tab-pane fade show active" id="review" role="tabpanel" aria-labelledby="review-tab">
-	                <div class="row">
-	                    <div class="col-lg-6">
-	                        <div class="row total_rate">
-	                            <div class="col-6">
-	                                <div class="box_total">
-	                                    <h5>សរុប</h5>
-	                                    <h4>4.0</h4>
-	                                    <h6>(03 ពិនិត្យ)</h6>
-	                                </div>
-	                            </div>
-	                            <div class="col-6">
-	                                <div class="rating_list">
-	                                    <h3>ផ្អែកលើ 3 ការពិនិត្យឡើងវិញ</h3>
-	                                    <ul class="list">
-	                                        <li><a href="#">5 ផ្កាយ <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i> 01</a></li>
-	                                        <li><a href="#">4 ផ្កាយ <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i> 01</a></li>
-	                                        <li><a href="#">3 ផ្កាយ <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i> 01</a></li>
-	                                        <li><a href="#">2 ផ្កាយ <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i> 01</a></li>
-	                                        <li><a href="#">1 ផ្កាយ <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i> 01</a></li>
-	                                    </ul>
-	                                </div>
-	                            </div>
-	                        </div>
-	                        <div class="review_list">
-	                            <div class="review_item">
-	                                <div class="media">
-	                                    <div class="d-flex">
-	                                        <img src="{{asset('frontend/assets/img/product/review-1.png')}}" alt="">
-	                                    </div>
-	                                    <div class="media-body">
-	                                        <h4>Blake Ruiz</h4>
-	                                        <i class="fa fa-star"></i>
-	                                        <i class="fa fa-star"></i>
-	                                        <i class="fa fa-star"></i>
-	                                        <i class="fa fa-star"></i>
-	                                        <i class="fa fa-star"></i>
-	                                    </div>
-	                                </div>
-	                                <p>Great arch support and lighter than previous versions. Curious to see how they hold up.</p>
-	                            </div>
-	                            <div class="review_item">
-	                                <div class="media">
-	                                    <div class="d-flex">
-	                                        <img src="{{asset('frontend/assets/img/product/review-2.png')}}" alt="">
-	                                    </div>
-	                                    <div class="media-body">
-	                                        <h4>Blake Ruiz</h4>
-	                                        <i class="fa fa-star"></i>
-	                                        <i class="fa fa-star"></i>
-	                                        <i class="fa fa-star"></i>
-	                                        <i class="fa fa-star"></i>
-	                                        <i class="fa fa-star"></i>
-	                                    </div>
-	                                </div>
-	                                <p>Comfy. Good quality. Great for any project. I use it mainly in the house and it’s perfect. I have wide feet and had to size up. But still the length and width is good.</p>
-	                            </div>
-	                            <div class="review_item">
-	                                <div class="media">
-	                                    <div class="d-flex">
-	                                        <img src="{{asset('frontend/assets/img/product/review-3.png')}}" alt="">
-	                                    </div>
-	                                    <div class="media-body">
-	                                        <h4>Blake Ruiz</h4>
-	                                        <i class="fa fa-star"></i>
-	                                        <i class="fa fa-star"></i>
-	                                        <i class="fa fa-star"></i>
-	                                        <i class="fa fa-star"></i>
-	                                        <i class="fa fa-star"></i>
-	                                    </div>
-	                                </div>
-	                                <p>Great arch support and lighter than previous versions. Curious to see how they hold up.</p>
-	                            </div>
-	                        </div>
-	                    </div>
-	                    <div class="col-lg-6">
-	                        <div class="review_box">
-	                            <h4>បន្ថែមការពិនិត្យឡើងវិញ</h4>
-	                            <p>ការវាយតម្លៃរបស់អ្នក:</p>
-	                            <ul class="list">
-	                                <li><a href="#"><i class="fa fa-star"></i></a></li>
-	                                <li><a href="#"><i class="fa fa-star"></i></a></li>
-	                                <li><a href="#"><i class="fa fa-star"></i></a></li>
-	                                <li><a href="#"><i class="fa fa-star"></i></a></li>
-	                                <li><a href="#"><i class="fa fa-star"></i></a></li>
-	                            </ul>
-	                            <p>ពូកែ</p>
-	                            <form class="row contact_form" action="https://themewagon.github.io/karma/contact_process.php" method="post" id="contactForm" novalidate="novalidate">
-	                                <div class="col-md-12">
-	                                    <div class="form-group">
-	                                        <input type="text" class="form-control" id="name" name="name" placeholder="ឈ្មោះ​ពេញ​របស់​អ្នក" onfocus="this.placeholder = ''" onblur="this.placeholder = 'ឈ្មោះ​ពេញ​របស់​អ្នក'">
-	                                    </div>
-	                                </div>
-	                                <div class="col-md-12">
-	                                    <div class="form-group">
-	                                        <input type="email" class="form-control" id="email" name="email" placeholder="​អ៊ី​ម៉េ​ល" onfocus="this.placeholder = ''" onblur="this.placeholder = '​អ៊ី​ម៉េ​ល'">
-	                                    </div>
-	                                </div>
-	                                <div class="col-md-12">
-	                                    <div class="form-group">
-	                                        <input type="text" class="form-control" id="number" name="number" placeholder="លេខទូរសព្ទ" onfocus="this.placeholder = ''" onblur="this.placeholder = 'លេខទូរសព្ទ'">
-	                                    </div>
-	                                </div>
-	                                <div class="col-md-12">
-	                                    <div class="form-group">
-	                                        <textarea class="form-control" name="message" id="message" rows="1" placeholder="មតិយោបល់" onfocus="this.placeholder = ''" onblur="this.placeholder = 'មតិយោបល់'"></textarea></textarea>
-	                                    </div>
-	                                </div>
-	                                <div class="col-md-12 text-right">
-	                                    <button type="submit" value="submit" class="primary-btn">ដាក់ស្នើ</button>
-	                                </div>
-	                            </form>
-	                        </div>
-	                    </div>
-	                </div>
-	            </div>
-	        </div>
-	    </div>
-	</section>
-	<!--================End Product Description Area =================-->
-
-	@endsection --}}
-
-	<div class="container my-4">
-	    <div class="row">
-	        <!-- Left: images -->
-	        <div class="col-md-6">
-	            @php
-	            $images = is_array($product->images) ? $product->images : [];
-	            // ensure all paths trimmed
-	            $images = array_map(fn($i) => ltrim($i, '/'), $images);
-	            $first = $images[0] ?? null;
-	            $firstUrl = $first && \Illuminate\Support\Facades\Storage::disk('public')->exists($first)
-	            ? asset('storage/' . $first)
-	            : asset('frontend/assets/img/product/p4.jpg');
-	            @endphp
-
-	            <div class="product-gallery">
-	                <div class="main-image mb-2">
-	                    <img id="mainProductImage" src="{{ $firstUrl }}" class="img-fluid" style="width:100%; max-height:520px; object-fit:contain;" alt="{{ $product->name }}">
-	                </div>
-
-	                @if(count($images))
-	                <div class="d-flex flex-wrap">
-	                    @foreach($images as $img)
-	                    @php
-	                    $url = \Illuminate\Support\Facades\Storage::disk('public')->exists($img) ? asset('storage/'.$img) : asset('frontend/assets/img/product/p4.jpg');
-	                    @endphp
-	                    <div class="m-1" style="width:80px; height:80px; cursor:pointer;">
-	                        <img class="img-thumbnail thumb-image" src="{{ $url }}" data-url="{{ $url }}" style="width:100%; height:100%; object-fit:cover;">
+	            <!-- thumbnails column -->
+	            <aside class="col-lg-2 d-none d-lg-block">
+	                <div class="thumbs-list">
+	                    @if(count($images))
+	                    @foreach($images as $idx => $img)
+	                    @php $url = $imgUrl($img); @endphp
+	                    <div class="thumb-item mb-2">
+	                        <img src="{{ $url }}" data-full="{{ $url }}" class="img-thumbnail thumb-click" style="width:100%; cursor:pointer; object-fit:cover; height:80px;" data-index="{{ $idx }}">
 	                    </div>
 	                    @endforeach
-	                </div>
-	                @else
-	                <div class="text-muted">No images available.</div>
-	                @endif
-	            </div>
-	        </div>
-
-	        <!-- Right: product info -->
-	        <div class="col-md-6">
-	            <h2 class="mb-2">{{ $product->name }}</h2>
-
-	            <div class="mb-3">
-	                <strong class="h4">{{ number_format($product->price, 2) }} {{ config('app.currency', '$') }}</strong>
-	                @if($product->stock <= 0) <span class="badge badge-danger ml-2">Out of stock</span>
 	                    @else
-	                    <small class="text-muted ml-2">In stock: {{ $product->stock }}</small>
+	                    <div class="thumb-item mb-2">
+	                        <img src="{{ $placeholder }}" class="img-thumbnail" style="width:100%; object-fit:cover; height:80px;">
+	                    </div>
 	                    @endif
+	                </div>
+	            </aside>
+
+	            <!-- main image + gallery -->
+	            <div class="col-lg-6">
+	                <div class="main-image mb-3 text-center">
+	                    @php
+	                    $first = $images[0] ?? null;
+	                    $mainUrl = $imgUrl($first);
+	                    @endphp
+	                    <img id="product-main-image" src="{{ $mainUrl }}" alt="{{ $product->name }}" style="width:100%; max-height:520px; object-fit:cover; border-radius:6px;">
+	                </div>
+
+	                {{-- small carousel for mobile (thumbnails horizontally) --}}
+	                <div class="d-block d-lg-none mb-3">
+	                    <div class="mobile-thumbs d-flex overflow-auto">
+	                        @if(count($images))
+	                        @foreach($images as $idx => $img)
+	                        @php $url = $imgUrl($img); @endphp
+	                        <div style="min-width:90px; margin-right:8px;">
+	                            <img src="{{ $url }}" data-full="{{ $url }}" class="img-thumbnail thumb-click" style="width:90px; height:60px; object-fit:cover; cursor:pointer;" data-index="{{ $idx }}">
+	                        </div>
+	                        @endforeach
+	                        @endif
+	                    </div>
+	                </div>
+
 	            </div>
 
-	            <div class="mb-2">
-	                <span class="text-muted">Category: </span>
-	                <strong>{{ optional($product->category)->name ?? '—' }}</strong>
-	            </div>
+	            <!-- product info -->
+	            <div class="col-lg-4">
+	                <h2>{{ $product->name }}</h2>
+	                <div class="mb-2">
+	                    <strong style="font-size:20px;">{{ number_format($product->price,2) }} {{ config('app.currency', '$') }}</strong>
+	                </div>
 
-	            <div class="mb-3">
-	                <span class="text-muted">Seller: </span>
-	                @if($product->user)
-	                <strong>{{ $product->user->name }}</strong>
-	                @if(optional($product->user->sellerProfile)->slug)
-	                — <a href="{{ route('shop.show', $product->user->sellerProfile->slug) }}" target="_blank">Visit shop</a>
-	                @endif
-	                @else
-	                <em class="text-warning">No seller linked</em>
-	                @endif
-	            </div>
+	                <div class="mb-3">
+	                    <span>Stock: {{ $product->stock }}</span> |
+	                    <span>Category: {{ optional($product->category)->name ?? '—' }}</span>
+	                </div>
 
-	            <div class="mb-4">
-	                <form method="POST" action="{{ url('/cart/add') }}">
+	                <div class="mb-3">
+	                    <p>{!! nl2br(e($product->description)) !!}</p>
+	                </div>
+
+	                {{-- <div class="mb-3">
+	                    <form id="add-to-cart-form" method="post" action="{{ route('cart.add') }}">
+	                @csrf
+	                <input type="hidden" name="product_id" value="{{ $product->id }}">
+	                <div class="form-group">
+	                    <label>Quantity</label>
+	                    <input type="number" name="qty" class="form-control" value="1" min="1" style="width:100px;">
+	                </div>
+	                <button type="submit" id="add-to-cart-btn" class="btn btn-primary">Add to cart</button>
+	                </form>
+
+	                <a href="{{ route('shop.show', optional($product->user->sellerProfile)->slug ?? '#') }}" class="btn btn-outline-secondary" target="_blank">Visit shop</a>
+	            </div> --}}
+
+	            <div class="p-3 border rounded-3 bg-white shadow-sm">
+	                <form action="{{ route('cart.add') }}" method="POST" class="mb-3 qty-form">
 	                    @csrf
 	                    <input type="hidden" name="product_id" value="{{ $product->id }}">
-	                    <div class="form-group row">
-	                        <label class="col-sm-3 col-form-label">Quantity</label>
-	                        <div class="col-sm-3">
-	                            <input type="number" name="quantity" value="1" min="1" max="{{ max(1, $product->stock) }}" class="form-control">
+
+	                    <label class="form-label mb-2 fw-semibold">Quantity</label>
+
+	                    {{-- Desktop / wide: compact inline controls --}}
+	                    <div class="qty-inline d-none d-sm-flex align-items-center mb-3" style="max-width:220px;">
+	                        <button type="button" class="btn btn-outline-secondary btn-qty btn-decrease" aria-label="Decrease quantity">−</button>
+
+	                        <input type="number" name="qty" value="1" min="1" step="1" class="form-control text-center mx-2 qty-input" style="width:80px;" aria-label="Quantity">
+
+	                        <button type="button" class="btn btn-outline-secondary btn-qty btn-increase" aria-label="Increase quantity">+</button>
+	                    </div>
+
+	                    {{-- Mobile: stacked large controls --}}
+	                    <div class="qty-stacked d-sm-none mb-3">
+	                        <div class="d-flex gap-2">
+	                            <button type="button" class="btn btn-outline-secondary flex-fill btn-qty btn-decrease" aria-label="Decrease quantity">−</button>
+	                            <input type="number" name="qty" value="1" min="1" step="1" class="form-control text-center qty-input" aria-label="Quantity">
+	                            <button type="button" class="btn btn-outline-secondary flex-fill btn-qty btn-increase" aria-label="Increase quantity">+</button>
 	                        </div>
 	                    </div>
 
-	                    <div class="d-flex">
-	                        <button class="btn btn-primary mr-2" {{ $product->stock <= 0 ? 'disabled' : '' }}>
-	                            <i class="ti-bag"></i> Add to cart
-	                        </button>
-
-	                        <a href="{{ route('product.show', $product->id) }}" class="btn btn-outline-secondary">View full</a>
-	                    </div>
+	                    <button type="submit" class="btn btn-success w-100 py-2 fw-semibold">
+	                        <span class="ti-bag me-2" aria-hidden="true"></span> Add to Cart
+	                    </button>
 	                </form>
-	            </div>
 
-	            <hr>
-
-	            <h5>Description</h5>
-	            <div class="product-description">
-	                {!! nl2br(e($product->description ?: 'No description provided.')) !!}
-	            </div>
-	        </div>
-	    </div>
-
-	    {{-- Related products --}}
-	    @if($related && $related->count())
-	    <div class="row mt-5">
-	        <div class="col-12">
-	            <h4>Related Products</h4>
-	        </div>
-	        @foreach($related as $rp)
-	        @php
-	        $rthumb = is_array($rp->images) && count($rp->images) ? $rp->images[0] : null;
-	        $rUrl = $rthumb && \Illuminate\Support\Facades\Storage::disk('public')->exists($rthumb) ? asset('storage/'.$rthumb) : asset('frontend/assets/img/product/p4.jpg');
-	        @endphp
-	        <div class="col-md-3 mb-3">
-	            <div class="card h-100">
-	                <a href="{{ route('product.show', $rp->id) }}">
-	                    <img src="{{ $rUrl }}" class="card-img-top" style="height:160px; object-fit:cover;">
+	                <a href="{{ route('shop.show', optional($product->user->sellerProfile)->slug ?? '#') }}" class="btn btn-outline-secondary w-100">
+	                    Visit Shop
 	                </a>
-	                <div class="card-body p-2">
-	                    <h6 class="card-title mb-1" style="font-size:14px;">{{ \Illuminate\Support\Str::limit($rp->name, 50) }}</h6>
-	                    <div class="text-muted">{{ number_format($rp->price,2) }} {{ config('app.currency', '$') }}</div>
-	                </div>
 	            </div>
+
+
+
+
+
 	        </div>
-	        @endforeach
+
 	    </div>
-	    @endif
-	</div>
+	    </div>
+	    {{-- Responsive qty behavior (paste once per page) --}}
+	    <script>
+	        document.addEventListener('DOMContentLoaded', function() {
+	            // delegate within this form block
+	            function setupQtyControls(root) {
+	                const decreaseBtns = root.querySelectorAll('.btn-decrease');
+	                const increaseBtns = root.querySelectorAll('.btn-increase');
+	                const qtyInputs = root.querySelectorAll('.qty-input');
+
+	                function clampInput(input) {
+	                    const min = parseInt(input.getAttribute('min') || 1, 10);
+	                    let val = parseInt(input.value || 0, 10);
+	                    if (isNaN(val) || val < min) val = min;
+	                    input.value = val;
+	                    return val;
+	                }
+
+	                // plus / minus handlers
+	                decreaseBtns.forEach(btn => {
+	                    btn.addEventListener('click', () => {
+	                        // affect nearest qty-input in same form
+	                        const input = btn.closest('form').querySelector('.qty-input');
+	                        if (!input) return;
+	                        let val = clampInput(input);
+	                        if (val > parseInt(input.getAttribute('min') || 1, 10)) {
+	                            input.value = val - 1;
+	                        }
+	                        input.dispatchEvent(new Event('change', {
+	                            bubbles: true
+	                        }));
+	                    });
+	                });
+
+	                increaseBtns.forEach(btn => {
+	                    btn.addEventListener('click', () => {
+	                        const input = btn.closest('form').querySelector('.qty-input');
+	                        if (!input) return;
+	                        let val = clampInput(input);
+	                        input.value = val + 1;
+	                        input.dispatchEvent(new Event('change', {
+	                            bubbles: true
+	                        }));
+	                    });
+	                });
+
+	                // clamp on blur and prevent invalid keys
+	                qtyInputs.forEach(input => {
+	                    input.addEventListener('blur', () => clampInput(input));
+	                    input.addEventListener('keydown', (e) => {
+	                        // allow: backspace, delete, arrows, tab
+	                        const allowed = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+	                        if (allowed.includes(e.key)) return;
+	                        // allow digits
+	                        if (e.key >= '0' && e.key <= '9') return;
+	                        // block others
+	                        if (e.key === 'Enter') {
+	                            input.blur();
+	                            return;
+	                        }
+	                        e.preventDefault();
+	                    });
+	                });
+	            }
+
+	            // initialize forms currently on page
+	            document.querySelectorAll('.qty-form').forEach(form => setupQtyControls(form));
+	        });
+
+	    </script>
+
+	    <style>
+	        /* small visual polish — adjust sizing easily */
+	        .btn-qty {
+	            min-width: 44px;
+	            min-height: 44px;
+	            font-size: 1.1rem;
+	            display: inline-flex;
+	            align-items: center;
+	            justify-content: center;
+	            padding: 0.35rem 0.6rem;
+	        }
+
+	        .qty-input {
+	            height: 44px;
+	            font-size: 1rem;
+	        }
+
+	        @media (max-width: 576px) {
+	            .qty-input {
+	                height: 48px;
+	                font-size: 1.05rem;
+	            }
+
+	            .btn-qty {
+	                min-height: 48px;
+	                font-size: 1.15rem;
+	            }
+	        }
+
+	    </style>
+
+	    <style>
+	        .btn-success {
+	            font-weight: 600;
+	        }
+
+	        .btn-success:hover {
+	            opacity: .9;
+	            transform: translateY(-1px);
+	            transition: .15s;
+	        }
+
+	        .btn-outline-secondary:hover {
+	            background: #f8f9fa;
+	        }
+
+	    </style>
+
+	    <style>
+	        /* keep thumbs column sticky on large screens */
+	        .thumbs-list {
+	            position: sticky;
+	            top: 100px;
+	        }
+
+	        .thumb-item img.active-thumb {
+	            outline: 3px solid #007bff;
+	        }
+
+	    </style>
+	    <script>
+	        document.addEventListener('DOMContentLoaded', function() {
+	            const form = document.getElementById('add-to-cart-form');
+	            const btn = document.getElementById('add-to-cart-btn');
+
+	            form.addEventListener('submit', function(e) {
+	                e.preventDefault();
+	                btn.disabled = true;
+	                const formData = new FormData(form);
+
+	                fetch(form.action, {
+	                        method: 'POST'
+	                        , headers: {
+	                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+	                            , 'Accept': 'application/json'
+	                        }
+	                        , body: formData
+	                    })
+	                    .then(response => {
+	                        btn.disabled = false;
+	                        if (!response.ok) throw response;
+	                        return response.json();
+	                    })
+	                    .then(data => {
+	                        if (data && data.success) {
+	                            const badge = document.getElementById('cart-badge');
+	                            if (badge) badge.textContent = (data.cart_count ? ? 0);
+	                            const original = btn.innerHTML;
+	                            btn.innerHTML = 'Added ✓';
+	                            setTimeout(() => btn.innerHTML = original, 900);
+	                        } else {
+	                            alert('Could not add to cart');
+	                        }
+	                    })
+	                    .catch(async err => {
+	                        btn.disabled = false;
+	                        let msg = 'Error adding to cart';
+	                        try {
+	                            const j = await err.json();
+	                            msg = j.message || msg;
+	                        } catch (e) {}
+	                        alert(msg);
+	                        console.error(err);
+	                    });
+	            });
+	        });
+
+	    </script>
+	    <!-- Ajax script: place after page scripts or in a script stack -->
+	    <script>
+	        document.addEventListener('DOMContentLoaded', function() {
+	            const form = document.getElementById('add-to-cart-form');
+	            const btn = document.getElementById('add-to-cart-btn');
+
+	            form.addEventListener('submit', function(e) {
+	                // do AJAX if you prefer
+	                e.preventDefault();
+	                btn.disabled = true;
+	                const formData = new FormData(form);
+
+	                fetch("{{ route('cart.add') }}", {
+	                    method: 'POST'
+	                    , headers: {
+	                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+	                        , 'Accept': 'application/json'
+	                    }
+	                    , body: formData
+	                }).then(r => r.json()).then(data => {
+	                    btn.disabled = false;
+	                    if (data && data.success) {
+	                        // update cart badge
+	                        const badge = document.getElementById('cart-badge');
+	                        if (badge) badge.textContent = data.cart_count ? ? 0;
+	                        // optional: show a toast
+	                        alert('Added to cart');
+	                    } else {
+	                        alert('Could not add to cart');
+	                    }
+	                }).catch(err => {
+	                    btn.disabled = false;
+	                    alert('Error adding to cart');
+	                    console.error(err);
+	                });
+	            });
+	        });
+
+	    </script>
+
+	    <script>
+	        document.addEventListener('DOMContentLoaded', function() {
+	            const mainImg = document.getElementById('product-main-image');
+	            document.querySelectorAll('.thumb-click').forEach(function(el) {
+	                el.addEventListener('click', function(e) {
+	                    const src = el.getAttribute('data-full') || el.src;
+	                    if (src) {
+	                        mainImg.src = src;
+	                        // toggle active class
+	                        document.querySelectorAll('.thumb-click').forEach(t => t.classList.remove('active-thumb'));
+	                        el.classList.add('active-thumb');
+	                    }
+	                });
+	            });
+	            // mark first thumbnail active
+	            const firstThumb = document.querySelector('.thumb-click');
+	            if (firstThumb) firstThumb.classList.add('active-thumb');
+	        });
+
+	    </script>
+
+	</section>
 
 	@endsection
-
-	@push('scripts')
-	<script>
-	    // thumbnail click -> swap main image
-	    document.addEventListener('click', function(e) {
-	        if (e.target && e.target.classList.contains('thumb-image')) {
-	            var url = e.target.getAttribute('data-url');
-	            var main = document.getElementById('mainProductImage');
-	            if (main && url) main.src = url;
-	        }
-	    });
-
-	</script>
-	@endpush

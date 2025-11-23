@@ -1,71 +1,93 @@
 @extends('frontend.layout.master')
+
 @section('content')
 
-    <!-- Start Banner Area -->
-    <section class="banner-area organic-breadcrumb">
-        <div class="container">
-            <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
-                <div class="col-first">
-                    <h1>ផ្ទៀងផ្ទាត់ផលិតផល</h1>
-                    <nav class="d-flex align-items-center">
-                        <a href="#">ទំព័រដើម<span class="lnr lnr-arrow-right"></span></a>
-                        <a href="#">ផ្ទៀងផ្ទាត់ផលិតផល</a>
-                    </nav>
+<!-- Start Banner Area -->
+<section class="banner-area organic-breadcrumb">
+    <div class="container">
+        <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+            <div class="col-first">
+                <h1>Shopping Cart</h1>
+                <nav class="d-flex align-items-center">
+                    <a href="index.html">Home<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="category.html">Cart</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End Banner Area -->
+
+<div class="container py-4">
+    <h3 class="mb-3">Checkout</h3>
+
+    @if(session('error')) <div class="alert alert-danger">{{ session('error') }}</div> @endif
+    @if(session('success')) <div class="alert alert-success">{{ session('success') }}</div> @endif
+
+    @if($items->isEmpty())
+    <div class="alert alert-info">Your cart is empty. <a href="{{ url('/') }}">Continue shopping</a>.</div>
+    @else
+    <div class="card mb-3">
+        <div class="card-body">
+            <table class="table table-sm mb-0">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th class="text-end">Price</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-end">Line</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($items as $item)
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="{{ resolveItemImageUrl($item['image'] ?? null) }}" alt="{{ $item['name'] }}" style="width:64px;height:48px;object-fit:cover;border-radius:6px;" class="me-2">
+                                <div>
+                                    <div class="fw-bold">{{ Str::limit($item['name'], 60) }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-end">{{ number_format($item['price'],2) }} $</td>
+                        <td class="text-center">{{ $item['qty'] }}</td>
+                        <td class="text-end">{{ number_format($item['line'],2) }} $</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div>
+                    <a href="{{ url('/') }}" class="btn btn-link">Continue shopping</a>
+                    <a href="{{ route('cart.index') }}" class="btn btn-outline-secondary">Edit cart</a>
+                </div>
+
+                <div class="text-end">
+                    <div class="mb-1 text-muted">Subtotal</div>
+                    <h4 class="mb-0">{{ number_format($subtotal,2) }} $</h4>
                 </div>
             </div>
         </div>
-    </section>
-    <!-- End Banner Area -->
+    </div>
 
-    <!--================Checkout Area =================-->
-    <section class="checkout_area section_gap">
-        <div class="container">
-            <div class="billing_details">
-                <div class="row">
-                    <div class="col-lg-6">
-                        <h3>ព័ត៌មានលម្អិតវិក្កយបត្រ</h3>
-                        <form class="row contact_form" action="#" method="post" novalidate="novalidate">
-                            <div class="col-md-6 form-group p_star">
-                                <input type="text" class="form-control" id="first" name="name">
-                                <span class="placeholder" data-placeholder="ត្រកូល"></span>
-                            </div>
-                            <div class="col-md-6 form-group p_star">
-                                <input type="text" class="form-control" id="last" name="name">
-                                <span class="placeholder" data-placeholder="នាម"></span>
-                            </div>
-                            <div class="col-md-6 form-group p_star">
-                                <input type="text" class="form-control" id="number" name="number">
-                                <span class="placeholder" data-placeholder="លេខទូរសព្ទ"></span>
-                            </div>
-                            <div class="col-md-6 form-group p_star">
-                                <input type="text" class="form-control" id="email" name="compemailany">
-                                <span class="placeholder" data-placeholder="អ៊ី​ម៉េ​ល"></span>
-                            </div>
-                            <div class="col-md-12 form-group p_star">
-                                <input type="text" class="form-control" id="add1" name="add1">
-                                <span class="placeholder" data-placeholder="អាស័យដ្ឋាន"></span>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="col-lg-6">
-                        <div class="order_box">
-                            <h2>ការបញ្ជាទិញរបស់អ្នក</h2>
-                            <ul class="list">
-                                <li><a href="#">ផលិតផល <span>សរុប</span></a></li>
-                                <li><a href="#">addidas <span class="middle">x 02</span> <span class="last">$720.00</span></a></li>
-                                <li><a href="#">Nike    <span class="middle">x 02</span> <span class="last">$720.00</span></a></li>
-                                <li><a href="#">PUMA    <span class="middle">x 02</span> <span class="last">$720.00</span></a></li>
-                            </ul>
-                            <ul class="list list_2">
-                                <li><a href="#">សរុប <span>$2160.00</span></a></li>
-                            </ul>
-                            <a class="primary-btn" href="{{url('/comfirm')}}" id="checkout_button">បន្តបង់ប្រាក់</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!--================End Checkout Area =================-->
+    <form action="{{ route('checkout.process') }}" method="POST" id="checkout-form">
+        @csrf
+        <input type="hidden" name="cart_snapshot" value="{{ base64_encode(json_encode($items->toArray())) }}">
+        <input type="hidden" name="payment_method" value="khqr">
+        <button type="submit" class="btn btn-success btn-lg w-100" id="checkout-submit-btn">
+            <span class="ti-bag me-2"></span> Pay with KHQR ({{ number_format($subtotal,2) }} $)
+        </button>
+    </form>
 
+    @endif
+</div>
+
+<script>
+    document.getElementById('checkout-form').addEventListener('submit', function(e) {
+        // small UX: disable submit to prevent double clicks
+        document.getElementById('checkout-submit-btn').disabled = true;
+    });
+
+</script>
 @endsection

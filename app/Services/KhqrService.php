@@ -1,36 +1,96 @@
 <?php
-
 namespace App\Services;
-
-use App\Models\Order;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class KhqrService
 {
-    // Build payload from order model
-    public function makePayload(Order $order): array
+    protected function tag(string $id, string $value): string
     {
-        return [
-            'merchant_id' => env('KHQR_MERCHANT_ID'),
-            'merchant_name' => env('KHQR_MERCHANT_NAME'),
-            'amount' => (float) $order->total,
-            'currency' => $order->currency,
-            'reference' => $order->order_number,
-        ];
+        $len = str_pad(strlen($value), 2, '0', STR_PAD_LEFT);
+        return $id . $len . $value;
     }
 
-    // Minimal QR: returns data:image/svg+xml;base64,SVG
-    public function qrSvgDataUri(array $payload): string
+    /**
+     * CRC16-CCITT (False) implementation used by EMV QR
+     * poly 0x1021, init 0xFFFF
+     */
+    protected function crc16(string $data): string
     {
-        $text = htmlspecialchars(json_encode($payload), ENT_QUOTES, 'UTF-8');
-        $svg = "<svg xmlns='http://www.w3.org/2000/svg' width='280' height='280'><rect width='100%' height='100%' fill='#fff'/><text x='10' y='20' font-size='10'>KHQR</text><text x='10' y='40' font-size='10'>{$text}</text></svg>";
-        return 'data:image/svg+xml;base64,'.base64_encode($svg);
+        $crc = 0xFFFF;
+        $poly = 0x1021;
+        $bytes = unpack('C*', $data);
+        foreach ($bytes as $b) {
+            $crc ^= ($b << 8);
+            for ($i = 0; $i < 8; $i++) {
+                if ($crc & 0x8000) $crc = (($crc << 1) ^ $poly) & 0xFFFF;
+                else $crc = ($crc << 1) & 0xFFFF;
+            }
+        }
+        return strtoupper(str_pad(dechex($crc & 0xFFFF), 4, '0', STR_PAD_LEFT));
     }
 
-    // Verify callback token (simple protection)
-    public function validateCallback(Request $request): bool
+    /**
+     * Build KHQR EMV payload.
+     *
+     * $merchantInfo keys: gui, merchant_id, merchant_name, merchant_city, mcc
+     * $amount decimal, currencyCode '116' for KHR by default
+     * $poi '12' dynamic
+     * $billNumber optional unique ref
+     */
+    public function buildPayload(array $merchantInfo, float $amount, string $currencyCode = '116', string $poi = '12', ?string $billNumber = null): string
     {
-        return $request->header('X-KHQR-TOKEN') === env('KHQR_CALLBACK_TOKEN') || $request->input('token') === env('KHQR_CALLBACK_TOKEN');
+        $payload = '';
+
+        // Payload Format Indicator (00)
+        $payload .= $this->tag('00', '01');
+
+        // Point of Initiation Method (01) - static '11' or dynamic '12'
+        $payload .= $this->tag('01', $poi);
+
+        // Merchant Account Info example in tag 30 (provider/trade-specific)
+        $ma = '';
+        $ma .= $this->tag('00', $merchantInfo['gui'] ?? 'BK'); // GUI (provider id)
+        if (!empty($merchantInfo['merchant_id'])) {
+            $ma .= $this->tag('01', $merchantInfo['merchant_id']);
+        }
+        if (!empty($merchantInfo['merchant_name'])) {
+            $ma .= $this->tag('02', substr($merchantInfo['merchant_name'], 0, 25));
+        }
+        $payload .= $this->tag('30', $ma);
+
+        // Merchant Category Code (52)
+        $payload .= $this->tag('52', $merchantInfo['mcc'] ?? '0000');
+
+        // Transaction Currency (53)
+        $payload .= $this->tag('53', $currencyCode);
+
+        // Transaction Amount (54)
+        $payload .= $this->tag('54', number_format($amount, 2, '.', ''));
+
+        // Country Code (58)
+        $payload .= $this->tag('58', 'KH');
+
+        // Merchant Name (59) and City (60)
+        if (!empty($merchantInfo['merchant_name'])) {
+            $payload .= $this->tag('59', substr($merchantInfo['merchant_name'], 0, 25));
+        }
+        if (!empty($merchantInfo['merchant_city'])) {
+            $payload .= $this->tag('60', substr($merchantInfo['merchant_city'], 0, 15));
+        }
+
+        // Additional data field (62) - store bill number if present
+        $add = '';
+        if ($billNumber) {
+            $add .= $this->tag('01', $billNumber);
+        }
+        if ($add) {
+            $payload .= $this->tag('62', $add);
+        }
+
+        // CRC (63) placeholder then compute CRC over payload + "6304"
+        $rawForCrc = $payload . '63' . '04';
+        $crc = $this->crc16($rawForCrc);
+        $payload .= $this->tag('63', $crc);
+
+        return $payload;
     }
 }

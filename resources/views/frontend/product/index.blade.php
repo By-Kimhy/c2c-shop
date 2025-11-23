@@ -17,49 +17,69 @@
 	    </div>
 	</section>
 	<!-- End Banner Area -->
-	{{-- <!-- start product Area (dynamic) -->
+	<!-- start product Area (dynamic) -->
 	<section class="products-area section_gap">
 	    <div class="container">
-	        <div class="row justify-content-center">
+	        <div class="row justify-content-center mb-4">
 	            <div class="col-lg-6 text-center">
 	                <div class="section-title">
 	                    <h1>ផលិតផលទើបនិងចេញ</h1>
-	                    <p>ផលិតផលល្អអាចត្រូវបានលក់ដោយការផ្សាយពាណិជ្ជកម្មដោយស្មោះត្រង់</p>
+	                    <p class="text-muted">ផលិតផលល្អអាចត្រូវបានលក់ដោយការផ្សាយពាណិជ្ជកម្មដោយស្មោះត្រង់</p>
 	                </div>
 	            </div>
 	        </div>
 
-	        <div class="row">
+	        <div class="row gx-3 gy-4">
 	            @forelse($products as $p)
-	            <div class="col-lg-3 col-md-6 mb-4">
-	                <div class="single-product">
-	                    @php
-	                    $thumb = is_array($p->images) && count($p->images) ? $p->images[0] : null;
-	                    $imgUrl = $thumb && Storage::disk('public')->exists($thumb)
-	                    ? asset('storage/'.$thumb)
-	                    : asset('frontend/assets/img/product/p4.jpg');
-	                    @endphp
+	            @php
+	            // normalize thumbnail: support array/json/string
+	            $thumb = null;
+	            if (!empty($p->images)) {
+	            if (is_array($p->images)) {
+	            $thumb = $p->images[0] ?? null;
+	            } else {
+	            $tmp = @json_decode($p->images, true);
+	            $thumb = (json_last_error() === JSON_ERROR_NONE) ? ($tmp[0] ?? null) : $p->images;
+	            }
+	            }
+	            $imgUrl = ($thumb && Storage::disk('public')->exists(ltrim($thumb, '/')))
+	            ? asset('storage/' . ltrim($thumb, '/'))
+	            : asset('frontend/assets/img/product/p4.jpg');
+	            @endphp
 
-	                    <img class="product-thumb" src="{{ $imgUrl }}" alt="{{ $p->name }}">
+	            <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+	                <div class="card product-card h-100 shadow-sm">
+	                    <a href="{{ route('product.show', $p->id) }}" class="text-decoration-none">
+	                        <div class="ratio ratio-4x3 overflow-hidden">
+	                            <img src="{{ $imgUrl }}" alt="{{ $p->name }}" class="card-img-top object-fit-cover">
+	                        </div>
+	                    </a>
 
-	                    <div class="product-details mt-2">
-	                        <h6 style="min-height:40px; overflow:hidden;">
-	                            {{ Str::limit($p->name, 60) }}
-	                        </h6>
+	                    <div class="card-body d-flex flex-column">
+	                        <a href="{{ route('product.show', $p->id) }}" class="text-dark text-decoration-none">
+	                            <h6 class="card-title mb-1">{{ Str::limit($p->name, 60) }}</h6>
+	                        </a>
 
-	                        <div class="price">
-	                            <h6>{{ number_format($p->price, 2) }} $</h6>
+	                        <div class="d-flex align-items-center justify-content-between mb-3">
+	                            <div class="text-primary fw-bold">{{ number_format($p->price, 2) }} $</div>
+	                            <div class="text-muted small">ID: {{ $p->id }}</div>
 	                        </div>
 
-	                        <div class="prd-bottom mt-2">
-	                            <a href="{{ url('/cart') }}" class="social-info">
-	                                <span class="ti-bag"></span>
-	                                <p class="hover-text">បន្ថែមចូលកន្ត្រក</p>
-	                            </a>
+	                        <div class="mt-auto d-flex gap-2">
+	                            {{-- Add to cart (simple POST) --}}
+	                            <form action="{{ route('cart.add') }}" method="POST" class="m-0 w-100 pr-2">
+	                                @csrf
+	                                <input type="hidden" name="product_id" value="{{ $p->id }}">
+	                                <input type="hidden" name="qty" value="1">
+	                                <button type="submit" class="btn btn-success w-100" aria-label="Add {{ $p->name }} to cart">
+	                                    <span class="ti-bag me-1" aria-hidden="true"></span>
+	                                    បន្ថែម
+	                                </button>
+	                            </form>
 
-	                            <a href="{{ url('/productDetail?id='.$p->id) }}" class="social-info">
-	                                <span class="lnr lnr-move"></span>
-	                                <p class="hover-text">បង្ហាញបន្តែម</p>
+	                            {{-- View --}}
+	                            <a href="{{ route('product.show', $p->id) }}" class="btn btn-outline-secondary" title="View details">
+	                                <span class="lnr lnr-move" aria-hidden="true"></span>
 	                            </a>
 	                        </div>
 	                    </div>
@@ -73,19 +93,34 @@
 	        </div>
 	    </div>
 
-	    <!-- FIX IMAGE SIZE -->
+	    <!-- small styles to keep product thumbs neat -->
 	    <style>
-	        .single-product .product-thumb {
-	            width: 100%;
-	            height: 250px;
-	            /* ← Make everything same height */
+	        .product-card {
+	            border-radius: 8px;
+	            overflow: hidden;
+	        }
+
+	        .product-card .object-fit-cover {
 	            object-fit: cover;
-	            border-radius: 5px;
+	            width: 100%;
+	            height: 100%;
+	            display: block;
+	        }
+
+	        .ratio-4x3 {
+	            aspect-ratio: 4 / 3;
+	        }
+
+	        @media (max-width: 576px) {
+	            .product-card .card-title {
+	                font-size: 0.95rem;
+	            }
 	        }
 
 	    </style>
-
 	</section>
-	<!-- end product Area --> --}}
+	<!-- end product Area -->
+
+
 
 	@endsection
