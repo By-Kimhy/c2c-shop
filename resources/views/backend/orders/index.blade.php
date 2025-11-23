@@ -90,9 +90,9 @@
                         </table>
                     </div>
 
-                    <div class="card-footer clearfix">
+                    {{-- <div class="card-footer clearfix">
                         {{ $orders->links() }}
-                    </div>
+                    </div> --}}
 
                     @else
                     <div class="p-4">

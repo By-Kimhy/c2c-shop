@@ -64,9 +64,9 @@
               </table>
             </div>
 
-            <div class="card-footer clearfix">
+            {{-- <div class="card-footer clearfix">
               {{ $categories->links() }}
-            </div>
+            </div> --}}
           @else
             <div class="p-4">No categories found.</div>
           @endif

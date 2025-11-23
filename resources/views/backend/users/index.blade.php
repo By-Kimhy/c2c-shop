@@ -66,9 +66,9 @@
             </table>
           </div>
 
-          <div class="card-footer clearfix">
+          {{-- <div class="card-footer clearfix">
             {{ $users->links() }}
-          </div>
+          </div> --}}
           @else
           <div class="p-4">No users found.</div>
           @endif

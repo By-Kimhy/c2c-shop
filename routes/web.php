@@ -169,15 +169,43 @@ Route::prefix('seller')
 // KHQR endpoints (non-checkout controller helpers — rename to avoid collisions)
 Route::get('/checkout/khqr/{order}', [KhqrController::class, 'showByOrder'])->name('khqr.showByOrder');
 Route::get('/checkout/khqr/status/{order}', [KhqrController::class, 'statusByOrder'])->name('khqr.statusByOrder');
-Route::post('/webhook/khqr', [KhqrController::class, 'webhook'])->name('khqr.webhook');
+Route::post('/webhook/khqr', [KhqrController::class, 'webhook'])->name('webhook.khqr');
+// web.php (POST)
+Route::post('/khqr/check-md5', [KhqrController::class, 'checkTransactionByMD5'])
+    ->name('khqr.check_md5');
 
-// Checkout routes (use CheckoutController)
+
+// // Checkout routes (use CheckoutController)
+// Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
+// Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+// // dynamic QR image (no file)
+// Route::get('/checkout/{order}/khqr/image', [CheckoutController::class, 'khqrImage'])
+//     ->name('checkout.khqr.image');
+
+// // keep the existing show page route
+// Route::get('/checkout/{order}/khqr', [CheckoutController::class, 'showKhqr'])
+//     ->name('checkout.khqr.show');
+// Route::post('/checkout/{order}/khqr', [CheckoutController::class, 'showKhqr'])
+//     ->name('checkout.khqr.show');
+
+// Checkout
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
 Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
 Route::get('/checkout/{order}/khqr', [CheckoutController::class, 'showKhqr'])->name('checkout.khqr.show');
 
+// KHQR helper endpoints (POST for actions)
+Route::post('/khqr/generate', [KhqrController::class, 'generateQrCode'])->name('khqr.generate'); // optional: create QR by amount/order
+Route::post('/khqr/check-md5', [KhqrController::class, 'checkMd5'])->name('khqr.check_md5');     // used by "Check payment" button
+
+
+
+
 // small helpers you used:
-Route::post('/generate-qrcode', [KhqrController::class, 'generateQrCode']);
-Route::post('/checkQRCode', [KhqrController::class, 'checkTransactionByMD5']);
-Route::post('/checkout/khqr/create', [KhqrController::class, 'generateQrCode'])->name('checkout.khqr.create');
-Route::post('/khqr/generate/{order}', [KhqrController::class, 'generateQrFromOrder']);
+// Route::post('/generate-qrcode', [KhqrController::class, 'generateQrCode']);
+// Route::post('/checkQRCode', [KhqrController::class, 'checkTransactionByMD5']);
+// Route::post('/checkout/khqr/create', [KhqrController::class, 'generateQrCode'])->name('checkout.khqr.create');
+// Route::post('/khqr/generate/{order}', [KhqrController::class, 'generateQrFromOrder']);
+
+
+// Route::get('/generate-qrcode', [KhqrController::class, 'generateQrCode']);
+// Route::get('/checkQRCode', [KhqrController::class, 'checkTransactionByMD5']);

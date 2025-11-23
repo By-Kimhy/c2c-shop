@@ -1,231 +1,171 @@
 <?php
-// namespace App\Http\Controllers;
-
-// use Illuminate\Http\Request;
-// use App\Services\KhqrService;
-// use App\Models\Payment;
-// use Endroid\QrCode\QrCode;
-// use Illuminate\Support\Str;
-// use Illuminate\Support\Facades\Storage;
-// use KHQR\BakongKHQR;
-// use KHQR\Helpers\KHQRData;
-// use KHQR\Models\IndividualInfo;
-
-// class KhqrController extends Controller
-// {
-//     public function generateQrCode(Request $request)
-//     {
-//         // 1) Validate amount from request
-//         $request->validate([
-//             'amount' => 'required|numeric|min:0.01'
-//         ]);
-
-//         // 2) Get amount
-//         $amount = (float) $request->amount;
-
-//         // 3) Build KHQR payload
-//         $individualInfo = new IndividualInfo(
-//             bakongAccountID: 'kimhy_by@aclb',
-//             merchantName: 'BY KIMHY',
-//             merchantCity: 'PHNOM PENH',
-//             currency: KHQRData::CURRENCY_KHR,
-//             amount: $amount
-//         );
-
-//         $response = BakongKHQR::generateIndividual($individualInfo);
-//         return response()->json($response);
-//     }
-
-//     public function checkTransactionByMD5(Request $request)
-//     {
-//         $md5 = $request->md5;
-
-//         $bakongKhqr = new BakongKHQR('your-api-token-here');
-
-//         $response = $bakongKhqr->checkTransactionByMD5($md5);
-
-//         return response()->json($response);
-//     }
-// }
-
 
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\KhqrService;
+use Illuminate\Support\Facades\Log;
 use App\Models\Payment;
 use App\Models\Order;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
 use KHQR\BakongKHQR;
 use KHQR\Helpers\KHQRData;
 use KHQR\Models\IndividualInfo;
 
-// optional Endroid classes - used if available
-use Endroid\QrCode\Builder\Builder;
-use Endroid\QrCode\Writer\PngWriter;
-use Endroid\QrCode\Encoding\Encoding;
-use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
-
 class KhqrController extends Controller
 {
     /**
-     * Generate KHQR payload and return QR image URL (PNG saved or google chart fallback).
-     *
-     * Options:
-     * - Provide order_id (preferred). Controller will use order->total.
-     * - Or provide amount directly (for quick tests).
+     * Generate KHQR payload using posted amount or order_id.
+     * Returns JSON { success, qr_string, md5, qr_data_url }
      */
     public function generateQrCode(Request $request)
     {
         $request->validate([
             'order_id' => 'nullable|integer|exists:orders,id',
-            'amount' => 'nullable|numeric|min:0.01',
+            'amount'   => 'nullable|numeric|min:0.01',
         ]);
 
-        // Resolve amount: prefer order total for safety
+        // Resolve token
+        $token = env('KHQR_API_TOKEN');
+        if (empty($token)) {
+            return response()->json(['success' => false, 'message' => 'KHQR API token not configured.'], 500);
+        }
+
+        // Prefer order total if provided
         $amount = null;
         $order = null;
         if ($request->filled('order_id')) {
-            $order = Order::find($request->order_id);
-            if (!$order) {
-                return response()->json(['error' => 'Order not found'], 404);
-            }
+            $order = Order::find($request->input('order_id'));
             $amount = (float) $order->total;
         } elseif ($request->filled('amount')) {
-            $amount = (float) $request->amount;
+            $amount = (float) $request->input('amount');
         }
 
         if (is_null($amount) || $amount <= 0) {
-            return response()->json(['error' => 'Invalid amount'], 422);
+            return response()->json(['success' => false, 'message' => 'Invalid amount'], 422);
         }
 
-        // Build payload using your KHQR lib (BakongKHQR)
         try {
             $individualInfo = new IndividualInfo(
                 bakongAccountID: env('KHQR_MERCHANT_ID', 'kimhy_by@aclb'),
-                merchantName: env('KHQR_MERCHANT_NAME', config('app.name', 'C2CShop')),
-                merchantCity: env('KHQR_MERCHANT_CITY', 'Phnom Penh'),
+                merchantName: env('KHQR_MERCHANT_NAME', config('app.name', 'BY KIMHY')),
+                merchantCity: env('KHQR_MERCHANT_CITY', 'PHNOM PENH'),
                 currency: KHQRData::CURRENCY_KHR,
-                amount: $amount
+                amount: number_format($amount, 2, '.', '')
             );
 
-            // the library returns the KHQR payload string or structured data.
+            // Use SDK
             $response = BakongKHQR::generateIndividual($individualInfo);
 
-            // depending on lib, $response may be string or array; normalize to string payload
-            $payload = is_string($response) ? $response : (string) (json_encode($response));
-        } catch (\Throwable $e) {
-            Log::error('KHQR generation failed: ' . $e->getMessage());
-            return response()->json(['error' => 'KHQR generation failed', 'message' => $e->getMessage()], 500);
-        }
+            // Extract payload and md5
+            $qrString = $response->data['qr'] ?? null;
+            $md5 = $response->data['md5'] ?? null;
 
-        // Create payment record (pending)
-        try {
-            $providerRef = 'KHQR' . strtoupper(Str::random(10));
-            $payment = Payment::create([
-                'order_id'    => $order ? $order->id : null,
-                'amount'      => $amount,
-                'currency'    => 'KHR',
-                'status'      => 'pending',
-                'provider'    => 'KHQR',
-                'provider_ref'=> $providerRef,
-                'payload'     => json_encode(['khqr_payload' => $payload]),
-            ]);
-        } catch (\Throwable $e) {
-            Log::error('Payment create failed: '.$e->getMessage());
-            return response()->json(['error' => 'Payment record failed', 'message' => $e->getMessage()], 500);
-        }
+            if (!$qrString) {
+                Log::error('KHQR returned no qr string', ['resp' => $response]);
+                return response()->json(['success' => false, 'message' => 'KHQR did not return QR payload'], 500);
+            }
 
-        // Now we want to return a QR image URL.
-        // First attempt: use Endroid Builder (server-side PNG) if available.
-        $qrUrl = null;
-        try {
-            if (class_exists(Builder::class)) {
-                $result = Builder::create()
-                    ->writer(new PngWriter())
-                    ->data($payload)
-                    ->encoding(new Encoding('UTF-8'))
-                    ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
-                    ->size(400)
-                    ->margin(10)
-                    ->build();
-
-                $png = $result->getString(); // raw PNG bytes
-                $filename = 'khqr-' . time() . '-' . Str::random(6) . '.png';
-                $storePath = 'public/khqr/' . $filename;
-                Storage::put($storePath, $png);
-                $qrUrl = asset('storage/khqr/' . $filename);
-            } else {
-                // If Endroid Builder missing, fallback to PngWriter + QrCode usage (older Endroid)
-                if (class_exists(PngWriter::class) && class_exists(\Endroid\QrCode\QrCode::class)) {
-                    $qr = new \Endroid\QrCode\QrCode($payload);
-                    // Some Endroid versions use ->setSize(); others don't.
-                    // attempt to set size if method exists
-                    if (method_exists($qr, 'setSize')) {
-                        $qr->setSize(400);
-                    }
-                    $writer = new PngWriter();
-                    $result = $writer->write($qr);
+            // Build in-memory PNG using Endroid Builder if available, else send payload only
+            $qrDataUrl = null;
+            try {
+                if (class_exists(\Endroid\QrCode\Builder\Builder::class)) {
+                    $result = \Endroid\QrCode\Builder\Builder::create()
+                        ->writer(new \Endroid\QrCode\Writer\PngWriter())
+                        ->data($qrString)
+                        ->encoding(new \Endroid\QrCode\Encoding\Encoding('UTF-8'))
+                        ->errorCorrectionLevel(new \Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh())
+                        ->size(350)
+                        ->margin(10)
+                        ->build();
                     $png = $result->getString();
-                    $filename = 'khqr-' . time() . '-' . Str::random(6) . '.png';
-                    $storePath = 'public/khqr/' . $filename;
-                    Storage::put($storePath, $png);
-                    $qrUrl = asset('storage/khqr/' . $filename);
+                    $qrDataUrl = 'data:image/png;base64,' . base64_encode($png);
                 }
+            } catch (\Throwable $e) {
+                Log::warning('Could not build Endroid QR PNG: ' . $e->getMessage());
+                $qrDataUrl = null;
             }
-        } catch (\Throwable $e) {
-            Log::warning('Endroid QR generation failed: '.$e->getMessage());
-            // continue to fallback below
-        }
 
-        // Final fallback: use Google Chart API QR (no server PNG created)
-        if (!$qrUrl) {
-            // URL-encode payload and produce Google Chart QR URL:
-            $encoded = rawurlencode($payload);
-            $size = 400;
-            $qrUrl = "https://chart.googleapis.com/chart?cht=qr&chs={$size}x{$size}&chl={$encoded}&chld=L|1";
-            // Note: using Google Chart means an external request for the QR image at display time.
-        }
-
-        // save QR image URL into payment payload for future reference
-        try {
-            $payloadArr = $payment->payload ?? [];
-            if (!is_array($payloadArr)) {
-                $payloadArr = json_decode($payment->payload, true) ?: [];
+            // Optionally create payment record (if order provided)
+            $payment = null;
+            if ($order) {
+                $providerRef = 'KHQR' . strtoupper(\Illuminate\Support\Str::random(10));
+                $payment = Payment::create([
+                    'order_id'    => $order->id,
+                    'amount'      => $amount,
+                    'currency'    => 'KHR',
+                    'status'      => 'pending',
+                    'provider'    => 'KHQR',
+                    'provider_ref'=> $providerRef,
+                    'payload'     => json_encode(['khqr_payload' => $qrString, 'md5' => $md5]),
+                ]);
             }
-            $payloadArr['qr_url'] = $qrUrl;
-            $payloadArr['khqr_payload'] = $payload;
-            $payment->payload = $payloadArr;
-            $payment->save();
-        } catch (\Throwable $e) {
-            Log::warning('Could not update payment payload with qr_url: '.$e->getMessage());
-        }
 
-        // Return JSON for frontend to display or redirect
-        return response()->json([
-            'success' => true,
-            'payment_id' => $payment->id,
-            'order_id' => $order ? $order->id : null,
-            'amount' => $amount,
-            'qr_url' => $qrUrl,
-            'payload' => $payload,
-        ]);
+            return response()->json([
+                'success' => true,
+                'qr' => $qrString,
+                'md5' => $md5,
+                'qr_data_url' => $qrDataUrl,
+                'payment_id' => $payment ? $payment->id : null,
+            ]);
+        } catch (\KHQR\Exceptions\KHQRException $ke) {
+            Log::error('KHQRException generateQrCode: ' . $ke->getMessage());
+            return response()->json(['success' => false, 'message' => 'KHQR error: ' . $ke->getMessage()], 500);
+        } catch (\Throwable $e) {
+            Log::error('generateQrCode failed: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Server error: ' . $e->getMessage()], 500);
+        }
     }
 
-    // Optional helper that checks a transaction using the KHQR lib
-    public function checkTransactionByMD5(Request $request)
+    /**
+     * Check a transaction by MD5 and mark related payment & order as paid.
+     * POST { md5: "..." }
+     */
+    public function checkMd5(Request $request)
     {
         $request->validate(['md5' => 'required|string']);
-        $md5 = $request->md5;
+        $md5 = $request->input('md5');
+
+        $token = env('KHQR_API_TOKEN');
+        if (empty($token)) {
+            return response()->json(['ok' => false, 'message' => 'KHQR API token not configured.'], 500);
+        }
+
         try {
-            $bakongKhqr = new BakongKHQR(env('KHQR_API_TOKEN', 'your-api-token-here'));
-            $response = $bakongKhqr->checkTransactionByMD5($md5);
-            return response()->json($response);
+            $client = new BakongKHQR($token);
+            $resp = $client->checkTransactionByMD5($md5);
+
+            // Normalise success check depending on SDK structure
+            $providerOk = false;
+            if (is_array($resp) && isset($resp['responseCode']) && $resp['responseCode'] == 0) $providerOk = true;
+            if (is_object($resp) && isset($resp->status) && is_array($resp->status) && ($resp->status['code'] ?? null) === 0) $providerOk = true;
+
+            if (!$providerOk) {
+                return response()->json(['ok' => false, 'message' => 'Provider returned non-success status', 'provider' => $resp], 200);
+            }
+
+            // Find our Payment by JSON payload md5
+            $payment = Payment::where('payload->md5', $md5)->latest('id')->first();
+            if (!$payment) {
+                return response()->json(['ok' => false, 'message' => 'Payment record not found for this md5', 'provider' => $resp], 200);
+            }
+
+            // Mark as paid (idempotent)
+            if ($payment->status !== 'paid') {
+                $payment->status = 'paid';
+                $payment->save();
+            }
+            $order = $payment->order;
+            if ($order && $order->status !== 'paid') {
+                $order->status = 'paid';
+                $order->save();
+            }
+
+            return response()->json(['ok' => true, 'message' => 'Payment marked paid', 'payment_id' => $payment->id, 'order_id' => $order->id ?? null], 200);
+        } catch (\KHQR\Exceptions\KHQRException $kex) {
+            Log::error('KHQRException in checkMd5: ' . $kex->getMessage(), ['md5' => $md5]);
+            return response()->json(['ok' => false, 'message' => 'KHQR error: ' . $kex->getMessage()], 500);
         } catch (\Throwable $e) {
-            Log::error('checkTransaction failed: '.$e->getMessage());
-            return response()->json(['error' => $e->getMessage()], 500);
+            Log::error('Error in checkMd5: ' . $e->getMessage(), ['md5' => $md5]);
+            return response()->json(['ok' => false, 'message' => 'Server error: ' . $e->getMessage()], 500);
         }
     }
 }
