@@ -12,32 +12,27 @@
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
                     <ul class="nav navbar-nav menu_nav ml-auto">
-                        <li class="nav-item active">
-                            <a class="nav-link" href="{{url('/')}}">ទំព័រដើម</a>
+                        <li class="nav-item {{ request()->is('/') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ url('/') }}">ទំព័រដើម</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{url('/product')}}">ទំនិញ</a>
+
+                        <li class="nav-item {{ request()->is('product*') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ url('/product') }}">ទំនិញ</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{url('/seller/dashboard')}}">លក់ទំនិញ</a>
+
+                        <li class="nav-item {{ request()->is('seller/dashboard') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ url('/seller/dashboard') }}">លក់ទំនិញ</a>
                         </li>
-                        {{-- <li class="nav-item submenu dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">ផ្សេងៗ</a>
-                            <ul class="dropdown-menu">
-                                <li class="nav-item"><a class="nav-link" href="{{url('/login')}}">ចូលក្នុងកម្មវិធី/ចុះឈ្មោះ</a></li>
-                                <li class="nav-item"><a class="nav-link" href="{{url('/tracking')}}">ការតាមដានការបញ្ជាទិញ</a></li>
-                            </ul>
-                        </li> --}}
-                        <li class="nav-item"><a class="nav-link" href="{{url('/contact')}}">ទាក់ទងមកយើង</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{{url('/login')}}">ចូលក្នុងកម្មវិធី/ចុះឈ្មោះ</a></li>
+
+                        <li class="nav-item {{ request()->is('contact') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ url('/contact') }}">ទាក់ទងមកយើង</a>
+                        </li>
+
+                        <li class="nav-item {{ request()->is('login') ? 'active' : '' }}">
+                            <a class="nav-link" href="{{ url('/login') }}">ចូលក្នុងកម្មវិធី/ចុះឈ្មោះ</a>
+                        </li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
-                        {{-- <li class="nav-item">
-                            <a href="{{ route('cart.index') }}" class="nav-link">
-                        <i class="fa fa-shopping-cart"></i>
-                        (<span id="cart-badge">{{ collect(session('cart', []))->sum('qty') }}</span>)
-                        </a>
-                        </li> --}}
                         <li class="nav-item">
                             <a href="{{ route('cart.index') }}" class="nav-link">
                                 <span class="ti-bag"></span>

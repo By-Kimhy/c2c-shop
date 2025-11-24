@@ -12,21 +12,27 @@
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div class="collapse navbar-collapse offset" id="navbarSupportedContent">
                     <ul class="nav navbar-nav menu_nav ml-auto">
-                        <li class="nav-item active">
+                        <li class="nav-item <?php echo e(request()->is('/') ? 'active' : ''); ?>">
                             <a class="nav-link" href="<?php echo e(url('/')); ?>">ទំព័រដើម</a>
                         </li>
-                        <li class="nav-item">
+
+                        <li class="nav-item <?php echo e(request()->is('product*') ? 'active' : ''); ?>">
                             <a class="nav-link" href="<?php echo e(url('/product')); ?>">ទំនិញ</a>
                         </li>
-                        <li class="nav-item">
+
+                        <li class="nav-item <?php echo e(request()->is('seller/dashboard') ? 'active' : ''); ?>">
                             <a class="nav-link" href="<?php echo e(url('/seller/dashboard')); ?>">លក់ទំនិញ</a>
                         </li>
-                        
-                        <li class="nav-item"><a class="nav-link" href="<?php echo e(url('/contact')); ?>">ទាក់ទងមកយើង</a></li>
-                        <li class="nav-item"><a class="nav-link" href="<?php echo e(url('/login')); ?>">ចូលក្នុងកម្មវិធី/ចុះឈ្មោះ</a></li>
+
+                        <li class="nav-item <?php echo e(request()->is('contact') ? 'active' : ''); ?>">
+                            <a class="nav-link" href="<?php echo e(url('/contact')); ?>">ទាក់ទងមកយើង</a>
+                        </li>
+
+                        <li class="nav-item <?php echo e(request()->is('login') ? 'active' : ''); ?>">
+                            <a class="nav-link" href="<?php echo e(url('/login')); ?>">ចូលក្នុងកម្មវិធី/ចុះឈ្មោះ</a>
+                        </li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
-                        
                         <li class="nav-item">
                             <a href="<?php echo e(route('cart.index')); ?>" class="nav-link">
                                 <span class="ti-bag"></span>
