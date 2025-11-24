@@ -156,13 +156,13 @@
 
     {{-- Status change forms --}}
     <div class="mb-3" style="text-align:center;">
-        {{-- <form method="post" action="{{ route('admin.orders.update.status', $order->id) }}" style="display:inline-block;">
+        <form method="post" action="{{ route('admin.orders.update.status', $order->id) }}" style="display:inline-block;">
             @csrf
             <input type="hidden" name="status" value="paid">
             <button type="submit" class="btn btn-success btn-block" onclick="return confirm('Mark order #{{ $order->order_number ?? $order->id }} as PAID? This will create a confirmed payment if none exists.')">
                 <i class="fas fa-check-circle"></i> Mark as Paid
             </button>
-        </form> --}}
+        </form>
 
         <form method="post" action="{{ route('admin.orders.update.status', $order->id) }}" style="display:inline-block; margin-left:8px;">
             @csrf

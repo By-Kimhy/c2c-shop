@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\PaymentConfirmed;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
@@ -55,23 +56,31 @@ class PaymentController extends Controller
     }
 
     /**
-     * Update payment status (confirm/failed/pending).
+     * Update payment status (confirm/failed/pending/paid).
      */
     public function updateStatus(Request $request, $id): RedirectResponse
     {
+        // Accept 'paid' as well as 'confirmed' — normalize to lowercase
         $request->validate([
-            'status' => 'required|in:pending,confirmed,failed',
+            'status' => 'required|in:pending,confirmed,failed,paid',
         ]);
 
-        $payment = Payment::with('order.user')->findOrFail($id);
-        $newStatus = $request->input('status');
+        $payment = Payment::with('order.user', 'order')->findOrFail($id);
+        $newStatus = strtolower($request->input('status'));
 
+        // If client sends 'paid', treat it like 'confirmed' for notifications and order update.
+        $effectiveStatus = $newStatus === Payment::STATUS_PAID ? Payment::STATUS_CONFIRMED : $newStatus;
+
+        // Update payment status using canonical values
         $payment->status = $newStatus;
+        if ($newStatus === Payment::STATUS_PAID || $newStatus === Payment::STATUS_CONFIRMED) {
+            $payment->paid_at = $payment->paid_at ?: now();
+        }
         $payment->save();
 
         $order = $payment->order;
 
-        if ($newStatus === 'confirmed') {
+        if ($effectiveStatus === Payment::STATUS_CONFIRMED) {
             // mark order paid if not already
             if ($order && $order->status !== 'paid') {
                 $order->status = 'paid';
@@ -79,8 +88,7 @@ class PaymentController extends Controller
             }
 
             // 1) Send email to buyer if we have an email
-            $recipientEmail = optional($order->user)->email ?? $order->shipping_phone ? null : null;
-            // prefer user email, then shipping email if you had it stored - adjust logic if needed
+            // prefer user email, then shipping email if you had it stored
             $recipientEmail = optional($order->user)->email ?? ($order->shipping_email ?? null);
 
             if ($recipientEmail) {
@@ -88,7 +96,7 @@ class PaymentController extends Controller
                     Mail::to($recipientEmail)->send(new PaymentConfirmed($payment));
                 } catch (\Throwable $e) {
                     // log but continue
-                    \Log::error('Payment confirmation email failed: ' . $e->getMessage(), ['payment_id' => $payment->id]);
+                    Log::error('Payment confirmation email failed: ' . $e->getMessage(), ['payment_id' => $payment->id]);
                 }
             }
 
@@ -116,14 +124,14 @@ class PaymentController extends Controller
                         'parse_mode' => 'HTML',
                     ]);
                 } catch (\Throwable $e) {
-                    \Log::error('Telegram notify failed: ' . $e->getMessage(), ['payment_id' => $payment->id]);
+                    Log::error('Telegram notify failed: ' . $e->getMessage(), ['payment_id' => $payment->id]);
                 }
             }
 
             return redirect()->route('admin.payments.show', $payment->id)->with('success', 'Payment confirmed and notifications sent (if configured).');
         }
 
-        if ($newStatus === 'failed') {
+        if ($newStatus === Payment::STATUS_FAILED) {
             // when failed, if order was paid, set to pending (or your business logic)
             if ($order && $order->status === 'paid') {
                 $order->status = 'pending';
@@ -145,7 +153,7 @@ class PaymentController extends Controller
         $payment = Payment::findOrFail($id);
 
         // if you want additional safety, prevent deleting confirmed payments:
-        // if ($payment->status === 'confirmed') {
+        // if ($payment->status === Payment::STATUS_CONFIRMED) {
         //     return redirect()->back()->with('error','Cannot delete confirmed payment.');
         // }
 

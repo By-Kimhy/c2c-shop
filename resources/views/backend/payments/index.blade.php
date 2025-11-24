@@ -11,7 +11,7 @@
           <select name="status" class="form-control ml-2">
             <option value="">All statuses</option>
             <option value="pending" {{ (request('status')=='pending')?'selected':'' }}>Pending</option>
-            <option value="confirmed" {{ (request('status')=='confirmed')?'selected':'' }}>Confirmed</option>
+            <option value="Paid" {{ (request('status')=='Paid')?'selected':'' }}>Paid</option>
             <option value="failed" {{ (request('status')=='failed')?'selected':'' }}>Failed</option>
           </select>
           <div class="input-group-append">
@@ -74,10 +74,6 @@
                 </tbody>
               </table>
             </div>
-
-            {{-- <div class="card-footer clearfix">
-              {{ $payments->links() }}
-            </div> --}}
           @else
             <div class="p-4">No payments found.</div>
           @endif

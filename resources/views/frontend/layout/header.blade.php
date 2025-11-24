@@ -21,14 +21,15 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{url('/seller/dashboard')}}">លក់ទំនិញ</a>
                         </li>
-                        <li class="nav-item submenu dropdown">
+                        {{-- <li class="nav-item submenu dropdown">
                             <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">ផ្សេងៗ</a>
                             <ul class="dropdown-menu">
                                 <li class="nav-item"><a class="nav-link" href="{{url('/login')}}">ចូលក្នុងកម្មវិធី/ចុះឈ្មោះ</a></li>
                                 <li class="nav-item"><a class="nav-link" href="{{url('/tracking')}}">ការតាមដានការបញ្ជាទិញ</a></li>
                             </ul>
-                        </li>
+                        </li> --}}
                         <li class="nav-item"><a class="nav-link" href="{{url('/contact')}}">ទាក់ទងមកយើង</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{url('/login')}}">ចូលក្នុងកម្មវិធី/ចុះឈ្មោះ</a></li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         {{-- <li class="nav-item">

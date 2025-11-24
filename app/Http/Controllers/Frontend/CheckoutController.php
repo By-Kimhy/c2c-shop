@@ -39,11 +39,29 @@ class CheckoutController extends Controller
 
     public function process(Request $request)
     {
-        // ensure POST (route already enforces)
+        // ensure POST method
+        if (!$request->isMethod('post')) {
+            return redirect()->route('cart.index')->with('error', 'Invalid request method.');
+        }
+
+        // 0) Quick config check: ensure KHQR token exists before touching DB
+        $token = env('KHQR_API_TOKEN');
+        if (empty($token)) {
+            Log::error('checkout.process aborted: KHQR_API_TOKEN not configured.');
+            return redirect()->route('cart.index')->with('error', 'Payment gateway is not configured. Please contact admin.');
+        }
+
+        // 1) Resolve cart from session or snapshot
         $cart = session('cart', []);
         if (empty($cart) && $request->filled('cart_snapshot')) {
-            $cart = json_decode(base64_decode($request->input('cart_snapshot')), true) ?: [];
+            $decoded = @json_decode(base64_decode($request->input('cart_snapshot')), true);
+            if (is_array($decoded)) {
+                $cart = $decoded;
+            } else {
+                Log::warning('checkout.process: cart_snapshot could not be decoded', ['snapshot' => $request->input('cart_snapshot')]);
+            }
         }
+
         if (empty($cart)) {
             return redirect()->route('cart.index')->with('error', 'Cart is empty.');
         }
@@ -51,6 +69,7 @@ class CheckoutController extends Controller
         DB::beginTransaction();
         try {
             $user = auth()->user();
+
             $order = new Order();
             $order->user_id = $user ? $user->id : null;
             $order->order_number = 'ORD-' . strtoupper(Str::random(8));
@@ -82,11 +101,7 @@ class CheckoutController extends Controller
             $order->total = round($subtotal + $order->shipping_fee, 2);
             $order->save();
 
-            // Build KHQR request using SDK
-            $token = env('KHQR_API_TOKEN');
-            if (empty($token))
-                throw new \Exception('KHQR API token not configured.');
-
+            // Build KHQR request using SDK (log response for debugging)
             $individualInfo = new IndividualInfo(
                 bakongAccountID: env('KHQR_MERCHANT_ID', 'kimhy_by@aclb'),
                 merchantName: env('KHQR_MERCHANT_NAME', config('app.name', 'BY KIMHY')),
@@ -95,28 +110,24 @@ class CheckoutController extends Controller
                 amount: number_format($order->total, 2, '.', '')
             );
 
-            $khqrResponse = BakongKHQR::generateIndividual($individualInfo);
-
-            if (!isset($khqrResponse->data['qr'])) {
-                throw new \Exception('KHQR generation failed or returned no QR payload');
+            $khqrResponse = null;
+            try {
+                $khqrResponse = BakongKHQR::generateIndividual($individualInfo);
+                Log::info('checkout.process KHQR response', ['resp' => $khqrResponse]);
+            } catch (\Throwable $e) {
+                Log::error('checkout.process KHQR generate failed: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+                throw new \Exception('Payment gateway error: ' . $e->getMessage());
             }
 
-            $qrString = $khqrResponse->data['qr']; // the KHQR string
-            $md5 = $khqrResponse->data['md5'] ?? null;
-            $payment = Payment::create([
-                'order_id' => $order->id,
-                'amount' => $amount,
-                'currency' => 'KHR',
-                'status' => 'pending',
-                'provider' => 'KHQR',
-                'provider_ref' => $providerRef,
-                'payload' => json_encode([
-                    'khqr_payload' => $qrString,
-                    'md5' => $md5,
-                ]),
-            ]);
+            if (!isset($khqrResponse->data['qr'])) {
+                Log::error('checkout.process KHQR no qr returned', ['resp' => $khqrResponse]);
+                throw new \Exception('Payment gateway did not return a QR payload.');
+            }
 
-            // Build in-memory PNG
+            $qrString = $khqrResponse->data['qr'];
+            $md5 = $khqrResponse->data['md5'] ?? null;
+
+            // Build in-memory PNG (Endroid)
             $result = Builder::create()
                 ->writer(new PngWriter())
                 ->data($qrString)
@@ -129,24 +140,38 @@ class CheckoutController extends Controller
             $png = $result->getString();
             $qrData = base64_encode($png);
 
-            // Save payment
+            // Save payment (ensure Payment model fillable)
             $providerRef = 'KHQR' . strtoupper(Str::random(10));
+
+            // $payment = Payment::create([
+            //     'order_id' => $order->id,
+            //     'amount' => $order->total,
+            //     'currency' => 'KHR',
+            //     'status' => 'pending',
+            //     'provider' => 'KHQR',
+            //     'provider_ref' => $providerRef,
+            //     'payload' => json_encode(['khqr_payload' => $qrString, 'md5' => $md5]),
+            //     'md5' => $md5, // <- add this
+            // ]);
+
             $payment = Payment::create([
                 'order_id' => $order->id,
                 'amount' => $order->total,
                 'currency' => 'KHR',
-                'status' => 'pending',
+                'status' => Payment::STATUS_PENDING,
                 'provider' => 'KHQR',
                 'provider_ref' => $providerRef,
-                'payload' => json_encode(['khqr_payload' => $qrString, 'md5' => $md5]),
+                'payload' => ['khqr_payload' => $qrString, 'md5' => $md5],
+                'md5' => $md5,
             ]);
+
+
 
             DB::commit();
 
             // clear cart
             session()->forget('cart');
 
-            // Return view with inline image and md5
             return view('frontend.checkout.khqr', [
                 'order' => $order,
                 'payment' => $payment,
@@ -157,9 +182,11 @@ class CheckoutController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('checkout.process error: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            // keep message user-friendly
             return redirect()->route('cart.index')->with('error', 'Checkout failed: ' . $e->getMessage());
         }
     }
+
 
     public function showKhqr($orderId)
     {

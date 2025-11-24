@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Payment;                     // <--- correct Payment model import
+use App\Observers\PaymentObserver; 
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+        Payment::observe(PaymentObserver::class);
         // Schema::defaultTableEngine('InnoDB');
     }
 }

@@ -1,0 +1,67 @@
+
+<?php $__env->startSection('content'); ?>
+
+<!-- Start Banner Area -->
+<section class="banner-area organic-breadcrumb">
+    <div class="container">
+        <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+            <div class="col-first">
+                <h1>ចូលក្នុងកម្មវិធី/ចុះឈ្មោះ</h1>
+                <nav class="d-flex align-items-center">
+                    <a href="#">ទំព័រដើម<span class="lnr lnr-arrow-right"></span></a>
+                    <a href="#">ចូលក្នុងកម្មវិធី/ចុះឈ្មោះ</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End Banner Area -->
+
+
+<section class="login_box_area section_gap">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-6">
+        <div class="login_form_inner">
+          <h3>Login</h3>
+
+          <?php if($errors->any()): ?>
+            <div class="alert alert-danger">
+              <ul class="mb-0">
+                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $err): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?> <li><?php echo e($err); ?></li> <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+              </ul>
+            </div>
+          <?php endif; ?>
+
+          <form method="post" action="<?php echo e(route('frontend.login.post')); ?>" class="row login_form">
+            <?php echo csrf_field(); ?>
+            <div class="col-md-12 form-group">
+              <input type="email" name="email" value="<?php echo e(old('email')); ?>" class="form-control" placeholder="Email" required>
+            </div>
+            <div class="col-md-12 form-group">
+              <input type="password" name="password" class="form-control" placeholder="Password" required>
+            </div>
+
+            <div class="col-md-12 form-group">
+              <div class="creat_account">
+                <input type="checkbox" id="remember" name="remember">
+                <label for="remember">Remember me</label>
+              </div>
+            </div>
+
+            <div class="col-md-12 form-group">
+              <button type="submit" class="primary-btn">Login</button>
+              <a href="<?php echo e(url('/password/reset')); ?>">Forgot password?</a>
+              <a href="<?php echo e(route('frontend.register')); ?>">Register</a>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('frontend.layout.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\wamp64\www\E-commerce\c2c-shop - Copy\resources\views/frontend/auth/login.blade.php ENDPATH**/ ?>

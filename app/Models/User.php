@@ -10,14 +10,47 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'is_buyer',
+        'is_seller',
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'is_buyer' => 'boolean',
+        'is_seller' => 'boolean',
+    ];
     // protected $fillable = ['name','email','password','role'];
     protected $guarded = []; // quick: allow mass assignment for seeding/testing
     public $timestamps = true;
 
-    public function products(){ return $this->hasMany(Product::class); }
-    public function orders(){ return $this->hasMany(Order::class); }
-    public function isAdmin(){ return $this->role === 'admin'; }
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
 
+    public function isSeller()
+    {
+        // role pivot or role string - you have roles pivot, so:
+        return $this->hasRole('seller') || $this->hasAnyRole(['seller']);
+    }
+    
+
+    public function isBuyer(): bool
+    {
+        return (bool) $this->is_buyer;
+    }
     public function roles()
     {
         return $this->belongsToMany(\App\Models\Role::class, 'role_user');
@@ -27,7 +60,7 @@ class User extends Authenticatable
     public function hasRole($name)
     {
         return $this->roles()->where('name', $name)->exists();
-    }   
+    }
     // Check if user has any role in array
     public function hasAnyRole(array $roles)
     {
@@ -39,11 +72,7 @@ class User extends Authenticatable
         return $this->hasOne(\App\Models\SellerProfile::class);
     }
 
-    public function isSeller()
-    {
-        // role pivot or role string - you have roles pivot, so:
-        return $this->hasRole('seller') || $this->hasAnyRole(['seller']);
-    }
+    
 
 
 }

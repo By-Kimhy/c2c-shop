@@ -17,6 +17,8 @@ use App\Http\Controllers\Frontend\ShopController;
 use App\Http\Controllers\Frontend\SellerAccountController;
 use App\Http\Controllers\Frontend\SellerProductController;
 use App\Http\Controllers\Frontend\SellerOrderController;
+use App\Http\Controllers\Frontend\AuthController as FrontendAuthController;
+
 
 use App\Http\Controllers\Backend\DashboardController;
 use App\Http\Controllers\Backend\OrderController;
@@ -46,16 +48,26 @@ Route::post('/cart/update', [CartController::class, 'update'])->name('cart.updat
 Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
+// Contact page (show & process)
+Route::get('/contact', [ContactController::class, 'index'])->name('contact');
+Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
+
+// Authentication routes (frontend)
+Route::get('/register', [FrontendAuthController::class, 'showRegisterForm'])->name('frontend.register');
+Route::post('/register', [FrontendAuthController::class, 'register'])->name('frontend.register.post');
+
+Route::get('/login', [FrontendAuthController::class, 'showLoginForm'])->name('frontend.login');
+Route::post('/login', [FrontendAuthController::class, 'login'])->name('frontend.login.post');
+
+Route::post('/logout', [FrontendAuthController::class, 'logout'])->name('frontend.logout');
+
+
+
+
 
 Route::get('/comfirm', [ComfirmController::class, 'index'])->name('comfirm');
 Route::get('/product', [ProductController::class, 'index'])->name('product');
 Route::get('/productDetail', [ProductDetailController::class, 'index'])->name('productDetail');
-Route::get('/tracking', [TrackingController::class, 'index'])->name('tracking');
-Route::get('/login', [LoginController::class, 'index'])->name('login');
-Route::get('/contact', [ContactController::class, 'index'])->name('contact');
-Route::get('/invoice', function () {
-    return view('frontend.invoice');
-})->name('invoice');
 
 Route::get('/shop/{slug}', [ShopController::class, 'show'])->name('shop.show');
 
@@ -68,7 +80,6 @@ Route::get('/shop/{slug}', [ShopController::class, 'show'])->name('shop.show');
 // ------------------------------
 // Admin Authentication (NO middleware)
 // ------------------------------
-
 Route::get('admin/login', [AuthController::class, 'showLoginForm'])->name('admin.login');
 Route::post('admin/login', [AuthController::class, 'login'])->name('admin.login.post');
 Route::post('admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
@@ -77,6 +88,7 @@ Route::post('admin/logout', [AuthController::class, 'logout'])->name('admin.logo
 // Admin Panel (PROTECTED)
 // ------------------------------
 Route::prefix('admin')->name('admin.')
+    ->middleware(['web', \App\Http\Middleware\AdminMiddleware::class, 'auth'])
     ->group(function () {
 
         Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -173,20 +185,6 @@ Route::post('/webhook/khqr', [KhqrController::class, 'webhook'])->name('webhook.
 // web.php (POST)
 Route::post('/khqr/check-md5', [KhqrController::class, 'checkTransactionByMD5'])
     ->name('khqr.check_md5');
-
-
-// // Checkout routes (use CheckoutController)
-// Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
-// Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
-// // dynamic QR image (no file)
-// Route::get('/checkout/{order}/khqr/image', [CheckoutController::class, 'khqrImage'])
-//     ->name('checkout.khqr.image');
-
-// // keep the existing show page route
-// Route::get('/checkout/{order}/khqr', [CheckoutController::class, 'showKhqr'])
-//     ->name('checkout.khqr.show');
-// Route::post('/checkout/{order}/khqr', [CheckoutController::class, 'showKhqr'])
-//     ->name('checkout.khqr.show');
 
 // Checkout
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');

@@ -23,7 +23,18 @@
               <p><strong>Amount:</strong> {{ number_format($payment->amount,2) }} {{ $payment->currency ?? config('app.currency','KHR') }}</p>
               <p><strong>Provider:</strong> {{ $payment->provider ?? '-' }}</p>
               <p><strong>Provider Ref:</strong> {{ $payment->provider_ref ?? '-' }}</p>
-              <p><strong>Status:</strong> <span class="badge badge-{{ $payment->status === 'confirmed' ? 'success' : ($payment->status==='pending' ? 'warning' : 'secondary') }}">{{ ucfirst($payment->status) }}</span></p>
+
+              {{-- FIXED BADGE STATUS --}}
+              <p>
+                <strong>Status:</strong>
+                <span class="badge badge-{{ 
+                    $payment->status === 'paid' ? 'success' :
+                    ($payment->status === 'pending' ? 'warning' :
+                    ($payment->status === 'failed' ? 'danger' : 'secondary')) 
+                }}">
+                    {{ ucfirst($payment->status) }}
+                </span>
+              </p>
 
               <hr>
               <h5>Order</h5>
@@ -38,7 +49,9 @@
               <hr>
               <h5>Raw payload</h5>
               @if($payment->payload)
-                <pre style="white-space:pre-wrap;max-height:300px;overflow:auto">{{ is_string($payment->payload) ? $payment->payload : json_encode($payment->payload, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE) }}</pre>
+                <pre style="white-space:pre-wrap;max-height:300px;overflow:auto">
+{{ is_string($payment->payload) ? $payment->payload : json_encode($payment->payload, JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE) }}
+                </pre>
               @else
                 <p>No payload.</p>
               @endif
@@ -50,30 +63,43 @@
           <div class="card">
             <div class="card-header"><h3 class="card-title">Actions</h3></div>
             <div class="card-body">
+
+              {{-- FIXED: Mark Paid must use lowercase "paid" --}}
               <form method="post" action="{{ route('admin.payments.update.status', $payment->id) }}">
                 @csrf
-                <input type="hidden" name="status" value="confirmed">
-                <button type="submit" class="btn btn-success btn-block" onclick="return confirm('Confirm payment?')">Confirm</button>
+                <input type="hidden" name="status" value="paid">
+                <button type="submit" class="btn btn-success btn-block" onclick="return confirm('Confirm payment?')">
+                  Mark Paid
+                </button>
               </form>
 
+              {{-- FAILED --}}
               <form method="post" action="{{ route('admin.payments.update.status', $payment->id) }}" class="mt-2">
                 @csrf
                 <input type="hidden" name="status" value="failed">
-                <button type="submit" class="btn btn-danger btn-block" onclick="return confirm('Mark payment as failed?')">Mark Failed</button>
+                <button type="submit" class="btn btn-danger btn-block" onclick="return confirm('Mark payment as failed?')">
+                  Mark Failed
+                </button>
               </form>
 
+              {{-- PENDING --}}
               <form method="post" action="{{ route('admin.payments.update.status', $payment->id) }}" class="mt-2">
                 @csrf
                 <input type="hidden" name="status" value="pending">
-                <button type="submit" class="btn btn-outline-secondary btn-block">Set Pending</button>
+                <button type="submit" class="btn btn-outline-secondary btn-block">
+                  Set Pending
+                </button>
               </form>
 
               <hr>
+
+              {{-- DELETE PAYMENT --}}
               <form method="post" action="{{ route('admin.payments.destroy', $payment->id) }}" onsubmit="return confirm('Delete payment?');">
                 @csrf
                 @method('DELETE')
                 <button class="btn btn-danger btn-block">Delete Payment</button>
               </form>
+
             </div>
           </div>
         </div>

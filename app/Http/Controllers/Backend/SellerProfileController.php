@@ -206,4 +206,24 @@ class SellerProfileController extends Controller
         return back()->with('success', 'User successfully linked to this seller profile.');
     }
 
+    public function show($slug)
+    {
+        $profile = \App\Models\SellerProfile::with('user')->where('slug', $slug)->firstOrFail();
+
+        // optional search q
+        $q = request('q');
+
+        $productsQuery = \App\Models\Product::where('user_id', $profile->user_id)
+            ->where('status', 'published');
+
+        if ($q) {
+            $productsQuery->where('name', 'like', "%{$q}%");
+        }
+
+        $products = $productsQuery->orderBy('created_at', 'desc')->paginate(12);
+
+        return view('frontend.shop.show_standalone', compact('profile', 'products', 'q'));
+    }
+
+
 }

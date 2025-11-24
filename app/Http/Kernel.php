@@ -11,7 +11,5 @@ class Kernel extends HttpKernel
         'auth' => \App\Http\Middleware\Authenticate::class,
         'ensure.seller' => \App\Http\Middleware\EnsureSeller::class,
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
-        // optional alias
-        'is_admin' => \App\Http\Middleware\AdminMiddleware::class,
     ];
 }
