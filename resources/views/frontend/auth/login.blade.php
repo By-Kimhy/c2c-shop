@@ -27,32 +27,31 @@
 
           @if($errors->any())
             <div class="alert alert-danger">
-              <ul class="mb-0">
-                @foreach($errors->all() as $err) <li>{{ $err }}</li> @endforeach
-              </ul>
+              <ul class="mb-0">@foreach($errors->all() as $err) <li>{{ $err }}</li> @endforeach</ul>
             </div>
           @endif
 
-          <form method="post" action="{{ route('frontend.login.post') }}" class="row login_form">
+          <form method="POST" action="{{ route('login.post') }}" class="row login_form">
             @csrf
+
             <div class="col-md-12 form-group">
               <input type="email" name="email" value="{{ old('email') }}" class="form-control" placeholder="Email" required>
             </div>
+
             <div class="col-md-12 form-group">
               <input type="password" name="password" class="form-control" placeholder="Password" required>
             </div>
 
             <div class="col-md-12 form-group">
               <div class="creat_account">
-                <input type="checkbox" id="remember" name="remember">
+                <input type="checkbox" id="remember" name="remember" value="1">
                 <label for="remember">Remember me</label>
               </div>
             </div>
 
             <div class="col-md-12 form-group">
               <button type="submit" class="primary-btn">Login</button>
-              <a href="{{ url('/password/reset') }}">Forgot password?</a>
-              <a href="{{ route('frontend.register') }}">Register</a>
+              <a class="btn btn-link" href="{{ route('password.request') }}">Forgot password?</a>
             </div>
           </form>
 
@@ -61,5 +60,4 @@
     </div>
   </div>
 </section>
-
 @endsection

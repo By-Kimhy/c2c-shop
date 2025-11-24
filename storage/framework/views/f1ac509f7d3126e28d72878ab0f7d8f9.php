@@ -27,32 +27,31 @@
 
           <?php if($errors->any()): ?>
             <div class="alert alert-danger">
-              <ul class="mb-0">
-                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $err): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?> <li><?php echo e($err); ?></li> <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-              </ul>
+              <ul class="mb-0"><?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $err): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?> <li><?php echo e($err); ?></li> <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?></ul>
             </div>
           <?php endif; ?>
 
-          <form method="post" action="<?php echo e(route('frontend.login.post')); ?>" class="row login_form">
+          <form method="POST" action="<?php echo e(route('login.post')); ?>" class="row login_form">
             <?php echo csrf_field(); ?>
+
             <div class="col-md-12 form-group">
               <input type="email" name="email" value="<?php echo e(old('email')); ?>" class="form-control" placeholder="Email" required>
             </div>
+
             <div class="col-md-12 form-group">
               <input type="password" name="password" class="form-control" placeholder="Password" required>
             </div>
 
             <div class="col-md-12 form-group">
               <div class="creat_account">
-                <input type="checkbox" id="remember" name="remember">
+                <input type="checkbox" id="remember" name="remember" value="1">
                 <label for="remember">Remember me</label>
               </div>
             </div>
 
             <div class="col-md-12 form-group">
               <button type="submit" class="primary-btn">Login</button>
-              <a href="<?php echo e(url('/password/reset')); ?>">Forgot password?</a>
-              <a href="<?php echo e(route('frontend.register')); ?>">Register</a>
+              <a class="btn btn-link" href="<?php echo e(route('password.request')); ?>">Forgot password?</a>
             </div>
           </form>
 
@@ -61,7 +60,5 @@
     </div>
   </div>
 </section>
-
 <?php $__env->stopSection(); ?>
-
 <?php echo $__env->make('frontend.layout.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\wamp64\www\E-commerce\c2c-shop - Copy\resources\views/frontend/auth/login.blade.php ENDPATH**/ ?>

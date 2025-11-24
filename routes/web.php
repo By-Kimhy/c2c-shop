@@ -9,6 +9,7 @@ use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\CheckoutController;
 use App\Http\Controllers\Frontend\ComfirmController;
 use App\Http\Controllers\Frontend\ContactController;
+use App\Http\Controllers\Frontend\RegisterController;
 use App\Http\Controllers\Frontend\LoginController;
 use App\Http\Controllers\Frontend\ProductController;
 use App\Http\Controllers\Frontend\ProductDetailController;
@@ -18,6 +19,10 @@ use App\Http\Controllers\Frontend\SellerAccountController;
 use App\Http\Controllers\Frontend\SellerProductController;
 use App\Http\Controllers\Frontend\SellerOrderController;
 use App\Http\Controllers\Frontend\AuthController as FrontendAuthController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Frontend\ForgotPasswordController;
+use App\Http\Controllers\Frontend\ResetPasswordController;
 
 
 use App\Http\Controllers\Backend\DashboardController;
@@ -27,7 +32,8 @@ use App\Http\Controllers\Backend\SellerProfileController;
 use App\Http\Controllers\Backend\CategoryController;
 use App\Http\Controllers\Backend\BProductController;
 use App\Http\Controllers\Backend\PaymentController as BackendPaymentController;
-use App\Http\Controllers\Backend\AuthController;
+use App\Http\Controllers\Backend\AuthController as BackendAuthController;
+
 
 
 
@@ -52,14 +58,96 @@ Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear')
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
 
-// Authentication routes (frontend)
-Route::get('/register', [FrontendAuthController::class, 'showRegisterForm'])->name('frontend.register');
-Route::post('/register', [FrontendAuthController::class, 'register'])->name('frontend.register.post');
 
-Route::get('/login', [FrontendAuthController::class, 'showLoginForm'])->name('frontend.login');
-Route::post('/login', [FrontendAuthController::class, 'login'])->name('frontend.login.post');
+// // Registration
+// Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('frontend.register');
+// Route::post('/register', [RegisterController::class, 'register'])->name('frontend.register.post');
 
-Route::post('/logout', [FrontendAuthController::class, 'logout'])->name('frontend.logout');
+// // Login
+// Route::get('/login', [LoginController::class, 'showLoginForm'])->name('frontend.login');
+// Route::post('/login', [LoginController::class, 'login'])->name('frontend.login.post');
+// // add this alias so Laravel's default redirect('login') works
+// Route::get('/login', function () {
+//     return app()->call([LoginController::class, 'showLoginForm']);
+// })->name('login');
+
+// Route::post('/login', function () {
+//     return app()->call([LoginController::class, 'login']);
+// })->name('login.post');
+
+// // Logout
+// Route::post('/logout', [LoginController::class, 'logout'])->name('frontend.logout');
+
+// // Show notice to verify (if logged in but not verified)
+// Route::get('/email/verify', function () {
+//     return view('frontend.auth.verify-notice');
+// })->middleware('auth')->name('verification.notice');
+
+// // Verification link (signed)
+// Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+//     $request->fulfill();
+//     return redirect()->intended('/')->with('success', 'Your email has been verified.');
+// })->middleware(['auth', 'signed'])->name('verification.verify');
+
+// // Resend verification email
+// Route::post('/email/verification-notification', function (Request $request) {
+//     $request->user()->sendEmailVerificationNotification();
+//     return back()->with('success', 'Verification link sent!');
+// })->middleware(['auth', 'throttle:6,1'])->name('verification.resend');
+
+// Route::get('password/forgot', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+// Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+
+// Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+// Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+
+
+/*
+|-------------------------
+| Frontend auth (use 'login' name so middleware works)
+|-------------------------
+*/
+
+// Registration
+Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('register');
+Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
+// Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('register'); // optional: you can keep frontend.register if you want
+// Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
+
+// Login (make sure name is 'login' so default middleware redirectTo() works)
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+// Route::get('/login', [LoginController::class, 'showLoginForm'])->name('frontend.login');          // <--- frontend.login
+// Route::post('/login', [LoginController::class, 'login'])->name('frontend.login.post');         // <--- frontend.login.post
+
+// Logout
+Route::post('/logout', [LoginController::class, 'logout'])->name('frontend.logout');
+// Logout
+// Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+// Email verification flow (frontend)
+Route::get('/email/verify', function () {
+    return view('frontend.auth.verify-notice');
+})->middleware('auth')->name('verification.notice');
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+    return redirect()->intended('/')->with('success', 'Your email has been verified.');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+    return back()->with('success', 'Verification link sent!');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.resend');
+
+// Password reset (frontend)
+Route::get('password/forgot', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+
+
+
 
 
 
@@ -80,9 +168,9 @@ Route::get('/shop/{slug}', [ShopController::class, 'show'])->name('shop.show');
 // ------------------------------
 // Admin Authentication (NO middleware)
 // ------------------------------
-Route::get('admin/login', [AuthController::class, 'showLoginForm'])->name('admin.login');
-Route::post('admin/login', [AuthController::class, 'login'])->name('admin.login.post');
-Route::post('admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
+Route::get('admin/login', [BackendAuthController::class, 'showLoginForm'])->name('admin.login');
+Route::post('admin/login', [BackendAuthController::class, 'login'])->name('admin.login.post');
+Route::post('admin/logout', [BackendAuthController::class, 'logout'])->name('admin.logout');
 
 // ------------------------------
 // Admin Panel (PROTECTED)
@@ -158,6 +246,7 @@ Route::prefix('admin')->name('admin.')
 */
 Route::prefix('seller')
     ->name('seller.')
+    ->middleware(['web', 'auth'])
     ->group(function () {
 
         // seller routes (inside the existing seller group)

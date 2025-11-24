@@ -6,24 +6,31 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
     protected $fillable = [
         'name',
         'email',
         'password',
+        'is_admin',
         'is_buyer',
         'is_seller',
     ];
 
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'is_admin' => 'boolean',
         'is_buyer' => 'boolean',
         'is_seller' => 'boolean',
     ];
-    // protected $fillable = ['name','email','password','role'];
     protected $guarded = []; // quick: allow mass assignment for seeding/testing
     public $timestamps = true;
 
@@ -40,17 +47,23 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
-    public function isSeller()
+    // public function isSeller()
+    // {
+    //     // role pivot or role string - you have roles pivot, so:
+    //     return $this->hasRole('seller') || $this->hasAnyRole(['seller']);
+    // }
+
+
+    public function isSeller(): bool
     {
-        // role pivot or role string - you have roles pivot, so:
-        return $this->hasRole('seller') || $this->hasAnyRole(['seller']);
+        return (bool) ($this->is_seller ?? false);
     }
-    
 
     public function isBuyer(): bool
     {
-        return (bool) $this->is_buyer;
+        return (bool) ($this->is_buyer ?? false);
     }
+
     public function roles()
     {
         return $this->belongsToMany(\App\Models\Role::class, 'role_user');
@@ -67,12 +80,17 @@ class User extends Authenticatable
         return $this->roles->pluck('name')->intersect($roles)->isNotEmpty();
     }
 
+    // public function sellerProfile()
+    // {
+    //     return $this->hasOne(\App\Models\SellerProfile::class);
+    // }
+
     public function sellerProfile()
     {
-        return $this->hasOne(\App\Models\SellerProfile::class);
+        // adjust class name/table if your SellerProfile model differs
+        return $this->hasOne(\App\Models\SellerProfile::class, 'user_id', 'id');
     }
 
-    
 
 
 }

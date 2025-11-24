@@ -17,7 +17,7 @@
 </section>
 <!-- End Banner Area -->
 
-
+<!--================Register Box Area =================-->
 <section class="login_box_area section_gap">
   <div class="container">
     <div class="row justify-content-center">
@@ -25,15 +25,14 @@
         <div class="login_form_inner">
           <h3>Register</h3>
 
+          @if(session('success')) <div class="alert alert-success">{{ session('success') }}</div> @endif
           @if($errors->any())
             <div class="alert alert-danger">
-              <ul class="mb-0">
-                @foreach($errors->all() as $err) <li>{{ $err }}</li> @endforeach
-              </ul>
+              <ul class="mb-0">@foreach($errors->all() as $err) <li>{{ $err }}</li> @endforeach</ul>
             </div>
           @endif
 
-          <form method="post" action="{{ route('frontend.register.post') }}" class="row login_form">
+          <form method="post" action="{{ route('register.post') }}" class="row login_form">
             @csrf
 
             <div class="col-md-12 form-group">
@@ -52,16 +51,9 @@
               <input type="password" name="password_confirmation" class="form-control" placeholder="Confirm Password" required>
             </div>
 
-            {{-- <div class="col-md-12 form-group">
-              <label><input type="checkbox" name="is_buyer" value="1" checked> Register as Buyer</label>
-              &nbsp;&nbsp;
-              <label><input type="checkbox" name="is_seller" value="1" checked> Register as Seller</label>
-              <p class="text-muted small mt-1">You can uncheck if you want only one role.</p>
-            </div> --}}
-
             <div class="col-md-12 form-group">
               <button type="submit" class="primary-btn">Create account</button>
-              <a class="btn btn-link" href="{{ route('frontend.login') }}">Already have account? Login</a>
+              <a class="btn btn-link" href="{{ route('login') }}">Already have account? Login</a>
             </div>
           </form>
 
@@ -70,5 +62,4 @@
     </div>
   </div>
 </section>
-
 @endsection

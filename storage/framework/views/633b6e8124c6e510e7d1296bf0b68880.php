@@ -17,7 +17,7 @@
 </section>
 <!-- End Banner Area -->
 
-
+<!--================Register Box Area =================-->
 <section class="login_box_area section_gap">
   <div class="container">
     <div class="row justify-content-center">
@@ -25,15 +25,14 @@
         <div class="login_form_inner">
           <h3>Register</h3>
 
+          <?php if(session('success')): ?> <div class="alert alert-success"><?php echo e(session('success')); ?></div> <?php endif; ?>
           <?php if($errors->any()): ?>
             <div class="alert alert-danger">
-              <ul class="mb-0">
-                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $err): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?> <li><?php echo e($err); ?></li> <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-              </ul>
+              <ul class="mb-0"><?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $err): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?> <li><?php echo e($err); ?></li> <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?></ul>
             </div>
           <?php endif; ?>
 
-          <form method="post" action="<?php echo e(route('frontend.register.post')); ?>" class="row login_form">
+          <form method="post" action="<?php echo e(route('register.post')); ?>" class="row login_form">
             <?php echo csrf_field(); ?>
 
             <div class="col-md-12 form-group">
@@ -52,11 +51,9 @@
               <input type="password" name="password_confirmation" class="form-control" placeholder="Confirm Password" required>
             </div>
 
-            
-
             <div class="col-md-12 form-group">
               <button type="submit" class="primary-btn">Create account</button>
-              <a class="btn btn-link" href="<?php echo e(route('frontend.login')); ?>">Already have account? Login</a>
+              <a class="btn btn-link" href="<?php echo e(route('login')); ?>">Already have account? Login</a>
             </div>
           </form>
 
@@ -65,7 +62,6 @@
     </div>
   </div>
 </section>
-
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('frontend.layout.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\wamp64\www\E-commerce\c2c-shop - Copy\resources\views/frontend/auth/register.blade.php ENDPATH**/ ?>

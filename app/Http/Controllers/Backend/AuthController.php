@@ -48,31 +48,54 @@ class AuthController extends Controller
     //     return redirect()->intended(route('admin.dashboard'));
     // }
 
+    // public function login(Request $request)
+    // {
+    //     $data = $request->validate([
+    //         'email' => 'required|email',
+    //         'password' => 'required|string',
+    //         'remember' => 'sometimes|boolean'
+    //     ]);
+
+    //     $user = User::where('email', $data['email'])->first();
+
+    //     if (!$user) {
+    //         return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
+    //     }
+
+    //     if (!\Illuminate\Support\Facades\Hash::check($data['password'], $user->password)) {
+    //         return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
+    //     }
+
+    //     // Use your is_admin flag (you set it earlier). If you prefer roles, change this.
+    //     if (!($user->is_admin ?? false)) {
+    //         return back()->withErrors(['email' => 'Unauthorized (admin only)'])->withInput();
+    //     }
+
+    //     $remember = $request->has('remember');
+    //     \Illuminate\Support\Facades\Auth::login($user, $remember);
+
+    //     return redirect()->intended(route('admin.dashboard'));
+    // }
+
     public function login(Request $request)
     {
         $data = $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
-            'remember' => 'sometimes|boolean'
         ]);
 
         $user = User::where('email', $data['email'])->first();
 
-        if (!$user) {
+        if (!$user || !Hash::check($data['password'], $user->password)) {
             return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
         }
 
-        if (!\Illuminate\Support\Facades\Hash::check($data['password'], $user->password)) {
-            return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
-        }
-
-        // Use your is_admin flag (you set it earlier). If you prefer roles, change this.
+        // require admin role
         if (!($user->is_admin ?? false)) {
             return back()->withErrors(['email' => 'Unauthorized (admin only)'])->withInput();
         }
 
-        $remember = $request->has('remember');
-        \Illuminate\Support\Facades\Auth::login($user, $remember);
+        Auth::login($user, $request->filled('remember'));
 
         return redirect()->intended(route('admin.dashboard'));
     }

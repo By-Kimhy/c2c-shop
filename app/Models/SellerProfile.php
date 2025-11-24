@@ -5,10 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class SellerProfile extends Model
 {
+
     use SoftDeletes;
+    use HasFactory;
+    protected $table = 'seller_profiles';
 
     protected $fillable = [
         'user_id',
