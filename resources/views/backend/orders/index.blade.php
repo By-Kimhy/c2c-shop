@@ -57,7 +57,7 @@
                                     <th>Order Number</th>
                                     <th>Buyer</th>
                                     <th>Email</th>
-                                    <th>Phone</th>
+                                    {{-- <th>Phone</th> --}}
                                     <th class="text-center">Items</th>
                                     <th class="text-right">Total</th>
                                     <th>Status</th>
@@ -72,7 +72,7 @@
                                     <td><strong>{{ $order->order_number }}</strong></td>
                                     <td>{{ optional($order->user)->name ?? $order->shipping_name ?? 'Guest' }}</td>
                                     <td>{{ optional($order->user)->email ?? '-' }}</td>
-                                    <td>{{ $order->shipping_phone ?? '-' }}</td>
+                                    {{-- <td>{{ $order->shipping_phone ?? '-' }}</td> --}}
                                     <td class="text-center">{{ $order->items->count() }}</td>
                                     <td class="text-right">{{ number_format($order->total ?? 0, 2) }} {{ $order->currency ?? config('app.currency','KHR') }}</td>
                                     <td>

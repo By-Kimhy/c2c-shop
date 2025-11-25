@@ -28,9 +28,35 @@
                             <a class="nav-link" href="{{ url('/contact') }}">ទាក់ទងមកយើង</a>
                         </li>
 
+                        {{-- <li class="nav-item {{ request()->is('login') ? 'active' : '' }}">
+                        <a class="nav-link" href="{{ url('/login') }}">ចូលក្នុងកម្មវិធី/ចុះឈ្មោះ</a>
+                        </li> --}}
+                        {{-- If NOT logged in --}}
+                        @guest
                         <li class="nav-item {{ request()->is('login') ? 'active' : '' }}">
-                            <a class="nav-link" href="{{ url('/login') }}">ចូលក្នុងកម្មវិធី/ចុះឈ្មោះ</a>
+                            <a class="nav-link" href="{{ url('/login') }}">
+                                ចូលក្នុងកម្មវិធី/ចុះឈ្មោះ
+                            </a>
                         </li>
+                        @endguest
+
+                        {{-- If logged in --}}
+                        @auth
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                {{ auth()->user()->name }}
+                            </a>
+
+                            <div class="dropdown-menu" aria-labelledby="userDropdown">
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button class="dropdown-item" type="submit">ចាកចេញ</button>
+                                </form>
+                            </div>
+                        </li>
+                        @endauth
+
+
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li class="nav-item">

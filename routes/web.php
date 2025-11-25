@@ -23,6 +23,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Frontend\ForgotPasswordController;
 use App\Http\Controllers\Frontend\ResetPasswordController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 
 use App\Http\Controllers\Backend\DashboardController;
@@ -58,50 +59,6 @@ Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear')
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
 
-
-// // Registration
-// Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('frontend.register');
-// Route::post('/register', [RegisterController::class, 'register'])->name('frontend.register.post');
-
-// // Login
-// Route::get('/login', [LoginController::class, 'showLoginForm'])->name('frontend.login');
-// Route::post('/login', [LoginController::class, 'login'])->name('frontend.login.post');
-// // add this alias so Laravel's default redirect('login') works
-// Route::get('/login', function () {
-//     return app()->call([LoginController::class, 'showLoginForm']);
-// })->name('login');
-
-// Route::post('/login', function () {
-//     return app()->call([LoginController::class, 'login']);
-// })->name('login.post');
-
-// // Logout
-// Route::post('/logout', [LoginController::class, 'logout'])->name('frontend.logout');
-
-// // Show notice to verify (if logged in but not verified)
-// Route::get('/email/verify', function () {
-//     return view('frontend.auth.verify-notice');
-// })->middleware('auth')->name('verification.notice');
-
-// // Verification link (signed)
-// Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-//     $request->fulfill();
-//     return redirect()->intended('/')->with('success', 'Your email has been verified.');
-// })->middleware(['auth', 'signed'])->name('verification.verify');
-
-// // Resend verification email
-// Route::post('/email/verification-notification', function (Request $request) {
-//     $request->user()->sendEmailVerificationNotification();
-//     return back()->with('success', 'Verification link sent!');
-// })->middleware(['auth', 'throttle:6,1'])->name('verification.resend');
-
-// Route::get('password/forgot', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-// Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-
-// Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-// Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
-
-
 /*
 |-------------------------
 | Frontend auth (use 'login' name so middleware works)
@@ -111,19 +68,16 @@ Route::post('/contact', [ContactController::class, 'send'])->name('contact.send'
 // Registration
 Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
-// Route::get('/register', [RegisterController::class, 'showRegisterForm'])->name('register'); // optional: you can keep frontend.register if you want
-// Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
 
 // Login (make sure name is 'login' so default middleware redirectTo() works)
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
-// Route::get('/login', [LoginController::class, 'showLoginForm'])->name('frontend.login');          // <--- frontend.login
-// Route::post('/login', [LoginController::class, 'login'])->name('frontend.login.post');         // <--- frontend.login.post
 
 // Logout
-Route::post('/logout', [LoginController::class, 'logout'])->name('frontend.logout');
-// Logout
-// Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+// Route::post('/logout', [LoginController::class, 'logout'])->name('frontend.logout');
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
+    ->middleware('auth')
+    ->name('logout');
 
 // Email verification flow (frontend)
 Route::get('/email/verify', function () {
@@ -276,9 +230,13 @@ Route::post('/khqr/check-md5', [KhqrController::class, 'checkTransactionByMD5'])
     ->name('khqr.check_md5');
 
 // Checkout
-Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
-Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
-Route::get('/checkout/{order}/khqr', [CheckoutController::class, 'showKhqr'])->name('checkout.khqr.show');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
+    Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+    Route::get('/checkout/{order}/khqr', [CheckoutController::class, 'showKhqr'])->name('checkout.khqr.show');
+});
+
 
 // KHQR helper endpoints (POST for actions)
 Route::post('/khqr/generate', [KhqrController::class, 'generateQrCode'])->name('khqr.generate'); // optional: create QR by amount/order

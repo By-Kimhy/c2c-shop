@@ -28,9 +28,34 @@
                             <a class="nav-link" href="<?php echo e(url('/contact')); ?>">ទាក់ទងមកយើង</a>
                         </li>
 
+                        
+                        
+                        <?php if(auth()->guard()->guest()): ?>
                         <li class="nav-item <?php echo e(request()->is('login') ? 'active' : ''); ?>">
-                            <a class="nav-link" href="<?php echo e(url('/login')); ?>">ចូលក្នុងកម្មវិធី/ចុះឈ្មោះ</a>
+                            <a class="nav-link" href="<?php echo e(url('/login')); ?>">
+                                ចូលក្នុងកម្មវិធី/ចុះឈ្មោះ
+                            </a>
                         </li>
+                        <?php endif; ?>
+
+                        
+                        <?php if(auth()->guard()->check()): ?>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <?php echo e(auth()->user()->name); ?>
+
+                            </a>
+
+                            <div class="dropdown-menu" aria-labelledby="userDropdown">
+                                <form action="<?php echo e(route('logout')); ?>" method="POST">
+                                    <?php echo csrf_field(); ?>
+                                    <button class="dropdown-item" type="submit">ចាកចេញ</button>
+                                </form>
+                            </div>
+                        </li>
+                        <?php endif; ?>
+
+
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         <li class="nav-item">

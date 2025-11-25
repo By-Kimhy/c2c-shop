@@ -6,11 +6,11 @@
     <div class="content-header">
         <div class="container-fluid d-flex justify-content-between align-items-center">
             <h1 class="m-0">Admin Dashboard</h1>
-            <div>
+            {{-- <div>
                 <a href="{{ route('admin.orders.index') }}" class="btn btn-sm btn-primary mr-2">Orders</a>
                 <a href="{{ route('admin.products.index') }}" class="btn btn-sm btn-secondary mr-2">Products</a>
                 <a href="{{ route('admin.users.index') }}" class="btn btn-sm btn-secondary">Users</a>
-            </div>
+            </div> --}}
         </div>
     </div>
 
@@ -67,14 +67,14 @@
             <!-- Charts and lists -->
             <div class="row">
                 <section class="col-lg-7 connectedSortable">
-                    <div class="card">
+                    {{-- <div class="card">
                         <div class="card-header">
                             <h3 class="card-title"><i class="fas fa-chart-line mr-1"></i> Revenue (last 6 months)</h3>
                         </div>
                         <div class="card-body">
                             <canvas id="revenueChart" style="height:260px"></canvas>
                         </div>
-                    </div>
+                    </div> --}}
 
                     <div class="card">
                         <div class="card-header"><h3 class="card-title">Recent Orders</h3></div>
@@ -114,12 +114,12 @@
                 </section>
 
                 <section class="col-lg-5 connectedSortable">
-                    <div class="card">
+                    {{-- <div class="card">
                         <div class="card-header"><h3 class="card-title">Order Status</h3></div>
                         <div class="card-body">
                             <canvas id="statusChart" style="height:260px"></canvas>
                         </div>
-                    </div>
+                    </div> --}}
 
                     <div class="card">
                         <div class="card-header"><h3 class="card-title">Top Sellers</h3></div>
