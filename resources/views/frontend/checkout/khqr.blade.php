@@ -60,43 +60,6 @@
         }
         @endphp
 
-        {{-- @if($md5Val)
-            <div class="mt-3">
-                <button id="check-payment-btn" class="btn btn-primary">Check payment</button>
-                <span id="check-status" class="ms-2"></span>
-            </div>
-
-            <script>
-                document.getElementById('check-payment-btn').addEventListener('click', async function () {
-                    const btn = this;
-                    btn.disabled = true;
-                    document.getElementById('check-status').textContent = 'Checking...';
-
-                    try {
-                        const resp = await fetch("{{ route('khqr.check_md5') }}", {
-        method: 'POST',
-        headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': "{{ csrf_token() }}"
-        },
-        body: JSON.stringify({ md5: "{{ $md5Val }}" })
-        });
-        const json = await resp.json();
-        if (json.ok) {
-        document.getElementById('check-status').textContent = json.message || 'Paid';
-        } else {
-        document.getElementById('check-status').textContent = json.message || 'Not paid';
-        }
-        } catch (err) {
-        document.getElementById('check-status').textContent = 'Error checking payment';
-        console.error(err);
-        } finally {
-        btn.disabled = false;
-        }
-        });
-        </script>
-        @endif --}}
-
         @if($md5Val)
         <div class="mt-3">
             <span id="check-status" class="text-muted">Waiting for payment...</span>

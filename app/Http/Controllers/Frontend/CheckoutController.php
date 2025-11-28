@@ -76,6 +76,7 @@ class CheckoutController extends Controller
             $order->shipping_name = $request->input('shipping_name') ?? ($user->name ?? 'Customer');
             $order->shipping_phone = $request->input('shipping_phone') ?? ($user->phone ?? '000000000');
             $order->shipping_address = $request->input('shipping_address') ?? ($user->address ?? 'No address provided');
+            $order->email = $request->input('email') ?? ($user->email ?? null);
             $order->subtotal = 0;
             $order->shipping_fee = 0;
             $order->total = 0;

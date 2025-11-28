@@ -60,8 +60,6 @@
         }
         ?>
 
-        
-
         <?php if($md5Val): ?>
         <div class="mt-3">
             <span id="check-status" class="text-muted">Waiting for payment...</span>
